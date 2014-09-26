@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 4, 2014 12:06:29 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class name="tdao.entities.Places" table="places" schema="public">
+        <id name="id" type="string">
+            <column name="id" />
+            <generator class="assigned" />
+        </id>
+        <property name="url" type="string">
+            <column name="url">
+                <comment>URL representing the location of additional place metadata for this place.</comment>
+            </column>
+        </property>
+        <property name="placeType" type="string">
+            <column name="place_type" length="150" />
+        </property>
+        <property name="name" type="string">
+            <column name="name" length="150" />
+        </property>
+        <property name="fullName" type="string">
+            <column name="full_name" length="150" />
+        </property>
+        <property name="countryCode" type="string">
+            <column name="country_code" length="4" />
+        </property>
+        <property name="country" type="string">
+            <column name="country" length="150" />
+        </property>
+        <property name="PBoundingBox" type="serializable">
+            <column name="p_bounding_box" />
+        </property>
+        <set name="tweets" table="tweet" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="place_id" />
+            </key>
+            <one-to-many class="tdao.entities.Tweet" />
+        </set>
+    </class>
+</hibernate-mapping>

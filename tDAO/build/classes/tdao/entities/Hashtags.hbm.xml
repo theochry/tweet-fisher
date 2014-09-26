@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 4, 2014 12:06:29 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class name="tdao.entities.Hashtags" table="hashtags" schema="public">
+        <id name="id" type="long">
+            <column name="id" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="tweet" class="tdao.entities.Tweet" fetch="select">
+            <column name="tweet_id" />
+        </many-to-one>
+        <property name="indices" type="string">
+            <column name="indices" />
+        </property>
+        <property name="text" type="string">
+            <column name="text" />
+        </property>
+    </class>
+</hibernate-mapping>
