@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 4, 2014 12:06:29 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class name="tdao.entities.Media" table="media" schema="public">
+        <id name="id" type="string">
+            <column name="id" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="tweet" class="tdao.entities.Tweet" fetch="select">
+            <column name="tweet_id" />
+        </many-to-one>
+        <property name="indices" type="string">
+            <column name="indices" />
+        </property>
+        <property name="mediaUrl" type="string">
+            <column name="media_url" />
+        </property>
+        <property name="mediaUrlHttps" type="string">
+            <column name="media_url_https" />
+        </property>
+        <property name="url" type="string">
+            <column name="url" />
+        </property>
+        <property name="displayUrl" type="string">
+            <column name="display_url" />
+        </property>
+        <property name="expandedUrl" type="string">
+            <column name="expanded_url" />
+        </property>
+        <property name="type" type="string">
+            <column name="type" />
+        </property>
+        <property name="size" type="string">
+            <column name="size">
+                <comment>i only use small, medium, large, thumb instead of w,h</comment>
+            </column>
+        </property>
+        <property name="sourceStatusIdStr" type="string">
+            <column name="source_status_id_str" />
+        </property>
+    </class>
+</hibernate-mapping>
