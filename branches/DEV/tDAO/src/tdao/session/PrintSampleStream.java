@@ -42,7 +42,8 @@ public class PrintSampleStream {
                     users.setContributorsEnabled(status.getUser().isContributorsEnabled());
                     users.setId(String.valueOf(status.getUser().getId()));
                     users.setName(status.getUser().getName());
-                    usermanager.saveNewPerson(users);            
+                    usermanager.saveNewPerson(users);     
+                    
             
             }
 
