@@ -2,15 +2,20 @@
 //https://raw.githubusercontent.com/yusuke/twitter4j/master/twitter4j-examples/src/main/java/twitter4j/examples/stream/PrintSampleStream.java
 
 package tdao.session;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import tdao.entities.Users;
 import twitter4j.*;
-import tdao.controllers.KeywordsStreamController;
+import tdao.controllers.KeywordsController;
 import twitter4j.conf.ConfigurationBuilder;
+import tdao.entities.Tweet;
 
 
-public class PrintSampleStream { 
+public class TwitterDownloader {
+    
+        private List<Users> users = new ArrayList<Users>();
+        private List<Tweet> tweets = new ArrayList<Tweet>();
     
         private ConfigurationBuilder _cb = new ConfigurationBuilder();
         private  TwitterStream _twitterStream = new TwitterStreamFactory(_cb.build()).getInstance();

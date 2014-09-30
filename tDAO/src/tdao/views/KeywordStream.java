@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import tdao.controllers.KeywordsStreamController;
+import tdao.controllers.KeywordsController;
 /**
  *
  * @author theodore
@@ -27,7 +27,7 @@ public class KeywordStream extends javax.swing.JFrame {
         
         initComponents();
     }
-  KeywordsStreamController ksc = new KeywordsStreamController();
+  KeywordsController ksc = new KeywordsController();
    
     /**
      * This method is called from within the constructor to initialize the form.
