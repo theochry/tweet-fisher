@@ -8,15 +8,15 @@ package tdao.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import tdao.session.PrintSampleStream;
+import tdao.session.TwitterDownloader;
 
 /**
  *
  * @author theodore */
-public class KeywordsStreamController extends PrintSampleStream {
+public class KeywordsController extends TwitterDownloader {
     
     private List<String> _keywords = new ArrayList<String>();
-    PrintSampleStream psstream = new PrintSampleStream();
+    TwitterDownloader psstream = new TwitterDownloader();
     
     
     public void setKeyword( String keyword )
