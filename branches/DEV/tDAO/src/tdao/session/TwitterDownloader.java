@@ -47,6 +47,43 @@ public class TwitterDownloader {
                     users.setContributorsEnabled(status.getUser().isContributorsEnabled());
                     users.setId(String.valueOf(status.getUser().getId()));
                     users.setName(status.getUser().getName());
+                    users.setDefaultProfile(status.getUser().isDefaultProfile());
+                    users.setCreatedAt(status.getUser().getCreatedAt().toString());
+                    users.setFavouritesCount(status.getUser().getFavouritesCount());
+                    users.setFollowersCount(status.getUser().getFollowersCount());
+                    users.setFriendsCount(status.getUser().getFriendsCount());
+                    users.setGeoEnabled(status.getUser().isGeoEnabled());
+                    users.setIsTranslator(status.getUser().isTranslator());
+                    users.setLang(status.getUser().getLang());
+                    users.setListedCount(status.getUser().getListedCount());
+                    users.setNDescription(status.getUser().getDescription());
+                    users.setNFollowRequestSent(status.getUser().isFollowRequestSent());
+                    users.setNLocation(status.getUser().getLocation());
+                    //TODO Notifications Deprecated, delete from database
+                    //users.setNNotifications(status.getUser().);
+                    users.setNTimeZone(status.getUser().getTimeZone());
+                    users.setNUrl(status.getUser().getURL());
+                    users.setNUtcOffset(status.getUser().getUtcOffset());
+                    users.setProfileBackgroundColor(status.getUser().getProfileBackgroundColor());
+                    users.setProfileBackgroundImageUrl(status.getUser().getProfileBackgroundImageURL());
+                    users.setProfileBackgroundImageUrlHttps(status.getUser().getProfileBackgroundImageUrlHttps());
+                    //TODO delete from DB
+                   // users.setProfileBackgroundTile(status.getUser().getProfileB);
+                    users.setProfileBannerUrl(status.getUser().getProfileBannerURL());
+                    users.setProfileImageUrl(status.getUser().getProfileImageURL());
+                    users.setProfileImageUrlHttps(status.getUser().getProfileImageURLHttps());
+                    users.setProfileLinkColor(status.getUser().getProfileLinkColor());
+                    users.setProfileSidebarBorderColor(status.getUser().getProfileSidebarBorderColor());
+                    users.setProfileSidebarFillColor(status.getUser().getProfileSidebarFillColor());
+                    users.setProfileTextColor(status.getUser().getProfileTextColor());
+                    //TODO does not exist on twitter4j
+                   // users.setProfileUseBackgroundImage(status.getUser().getProfileUs);
+                    users.setProtected_(status.getUser().isProtected());
+                    users.setScreenName(status.getUser().getScreenName());
+                    users.setStatusesCount(status.getUser().getStatusesCount());
+                   // users.setTweets(null); ??
+                    
+                    users.setVerified(status.getUser().isVerified());                   
                     usermanager.saveNewPerson(users);     
                     
             
