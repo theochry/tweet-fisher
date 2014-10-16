@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import org.hibernate.Query;
  
 
-public class UsersDAOImpl extends GenericDAOImpl<Users, BigDecimal> implements UsersDAO {
+public class UsersDAOImpl extends HibernateDAO<Users, BigDecimal> implements UsersDAO {
     public Users findByName(String name) {
         Users user = null;
         String sql = "SELECT p FROM Users p WHERE p.name = :name";

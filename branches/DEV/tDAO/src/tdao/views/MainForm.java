@@ -6,19 +6,75 @@
 
 package tdao.views;
 
+import DTO.TweetDTO;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Observable;
+import java.util.Observer;
+import tdao.controllers.DownloadController;
+import tdao.controllers.KeywordsController;
+import tdao.dao.Keywords;
+import tdao.dao.Keywords2;
+
 /**
  *
- * @author 13
+ * @author theodore
  */
-public class MainForm extends javax.swing.JFrame {
 
-    /**
-     * Creates new form MainForm
-     */
+ 
+public class MainForm extends javax.swing.JFrame implements Observer  {
+  
+    //views
+    private static MainForm _mainForm;
+    public static KeywordsForm _keywordsFormView = new KeywordsForm(); 
+    public static DownloadForm _downloadFormView = new DownloadForm();
+    
+    //models
+    public static TweetDTO _tweetDTO = new TweetDTO();    
+    public static Keywords _keywordsModel = new Keywords();
+    
+    //controllers
+    public static DownloadController _downloadController;
+   
+    public Keywords getKeywords()
+    {
+        return _keywordsModel;        
+    }
+    
+    public KeywordsForm getKeywordsFormView()
+    {
+        return _keywordsFormView;
+    }
+    
+    public DownloadForm getDownloadFormView()
+    {
+        return _downloadFormView;
+    }
+    public static MainForm getSingletonInstance()
+    {
+        if ( null == _mainForm )
+        {
+            _mainForm = new MainForm();
+        }
+        return _mainForm;
+    }
+    
+    MainForm(Keywords keywords){
+        this._keywordsModel = keywords;
+    }
+    
+    
+    
     public MainForm() {
-        initComponents();
+        initComponents();        
+        searchKeywordsJmenu.addActionListener(new MenuKeywordListener());   
+        downloadJmenu.addActionListener(new MenuDownloadListener() );
     }
 
+  
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -28,16 +84,17 @@ public class MainForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        mainKeywordsList = new java.awt.List();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
-        jMenuItem4 = new javax.swing.JMenuItem();
+        searchJmenu = new javax.swing.JMenu();
+        searchKeywordsJmenu = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
-        jMenuItem7 = new javax.swing.JMenuItem();
+        downloadJmenu = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jMenuItem8 = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
@@ -63,21 +120,26 @@ public class MainForm extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
-        jMenu2.setText("Search");
+        searchJmenu.setText("Search");
+        searchJmenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchJmenuActionPerformed(evt);
+            }
+        });
 
-        jMenuItem4.setText("Keywords");
-        jMenu2.add(jMenuItem4);
+        searchKeywordsJmenu.setText("Keywords");
+        searchJmenu.add(searchKeywordsJmenu);
 
         jMenuItem5.setText("Topics");
-        jMenu2.add(jMenuItem5);
+        searchJmenu.add(jMenuItem5);
 
         jMenuItem6.setText("Locations");
-        jMenu2.add(jMenuItem6);
+        searchJmenu.add(jMenuItem6);
 
-        jMenuItem7.setText("Download");
-        jMenu2.add(jMenuItem7);
+        downloadJmenu.setText("Download");
+        searchJmenu.add(downloadJmenu);
 
-        jMenuBar1.add(jMenu2);
+        jMenuBar1.add(searchJmenu);
 
         jMenu3.setText("Results");
 
@@ -99,11 +161,17 @@ public class MainForm extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(287, Short.MAX_VALUE)
+                .addComponent(mainKeywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(31, 31, 31))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 279, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(96, Short.MAX_VALUE)
+                .addComponent(mainKeywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
@@ -113,11 +181,15 @@ public class MainForm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
+    private void searchJmenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchJmenuActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_searchJmenuActionPerformed
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
+       
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
@@ -139,29 +211,70 @@ public class MainForm extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(MainForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
-        /* Create and display the form */
+     
+        KeywordsController keywordsController = new KeywordsController( _keywordsModel, _keywordsFormView );
+         _downloadController = new DownloadController( _keywordsModel, _downloadFormView, _tweetDTO ); 
+        
+        _mainForm = new MainForm (_keywordsModel );
+        _downloadFormView.addController(_downloadController);
+        _keywordsFormView.addController(keywordsController);  
+        
+        
+        _keywordsModel.addObserver( _mainForm );  
+        _tweetDTO.addObserver( _mainForm );
+        
+        
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainForm().setVisible(true);
+                new MainForm().setVisible(true);              
+               
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem downloadJmenu;
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
-    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JMenuItem jMenuItem9;
+    public java.awt.List mainKeywordsList;
+    private javax.swing.JMenu searchJmenu;
+    private javax.swing.JMenuItem searchKeywordsJmenu;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void update(Observable obs, Object x) {
+          //  mainKeywordsList.setVisible(true);
+        //System.out.println("keyword added "+((Keywords) obs).getState());
+        //paratirei kai to tweetDTO twra!
+       System.out.println("change state tweetDTO");
+    }
+   
+    //http://stackoverflow.com/questions/19407038/java-actionlistener-actionperformed-in-different-class
+    
+    class MenuKeywordListener implements ActionListener {
+    
+    public void actionPerformed(ActionEvent e) 
+    {       
+        MainForm mf = MainForm.getSingletonInstance();
+        mf.getKeywordsFormView().setVisible(true);
+        _mainForm.getDownloadFormView();
+    }   
+}
+class MenuDownloadListener implements ActionListener {
+    
+    public void actionPerformed(ActionEvent e) 
+    {       
+        MainForm mf = MainForm.getSingletonInstance();        
+        mf.getDownloadFormView().setVisible(true);
+    }   
+}
 }

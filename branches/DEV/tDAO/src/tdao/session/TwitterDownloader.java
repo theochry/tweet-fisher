@@ -2,25 +2,31 @@
 //https://raw.githubusercontent.com/yusuke/twitter4j/master/twitter4j-examples/src/main/java/twitter4j/examples/stream/PrintSampleStream.java
 
 package tdao.session;
+import DTO.TweetDTO;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Observable;
 import tdao.entities.Users;
 import twitter4j.*;
 import tdao.controllers.KeywordsController;
+import tdao.dao.Keywords;
 import twitter4j.conf.ConfigurationBuilder;
 import tdao.entities.Tweet;
 
+//http://stackoverflow.com/questions/11554672/getting-all-tweets-from-a-country-within-a-time-period-at-java
+//http://stackoverflow.com/questions/18016532/stop-the-twitter-stream-and-return-list-of-status-with-twitter4j
 
-public class TwitterDownloader {
-    
-        private List<Users> users = new ArrayList<Users>();
-        private List<Tweet> tweets = new ArrayList<Tweet>();
-    
+
+public class TwitterDownloader 
+{       
+        
+        private final Object lock = new Object();
+
         private ConfigurationBuilder _cb = new ConfigurationBuilder();
         private  TwitterStream _twitterStream = new TwitterStreamFactory(_cb.build()).getInstance();
         
-
+        private int i = 0;
       
     public boolean estabConnection()
     {
@@ -31,62 +37,39 @@ public class TwitterDownloader {
          _cb.setOAuthAccessTokenSecret("fftTwvK3K0Ixejhc4007JV6yaXv3KscFpkNsEN6Zc");
          return true;
     }
-    public void download( List<String> keywords )
+    
+    
+    public TweetDTO download( Keywords keywordsObj, final TweetDTO tweetDTO )//?d? ?a d?µ?????e?ta? t? tweetDTO, p?? ?a pe????e? t? tweet, user name etc
     {
          //Twitter twitter = new TwitterFactory().getInstance();   
         
+            
           
-            StatusListener listener = new StatusListener() {
-                @Override
-                public void onStatus(Status status) {               
-                    UsersManager usermanager = new UsersManagerImpl();
+            StatusListener listener = new StatusListener() {                 
+                @Override               
+                public void onStatus(Status status) {  
+                   
+                    UsersManager usermanager = new UsersManagerImpl();//Database
                     Users users = new Users();
                     usermanager.saveNewPerson(users);
                     System.out.println("@=======================>" + status.getUser().getScreenName() + " - " + status.getText() );
 
-                    users.setContributorsEnabled(status.getUser().isContributorsEnabled());
-                    users.setId(String.valueOf(status.getUser().getId()));
-                    users.setName(status.getUser().getName());
-                    users.setDefaultProfile(status.getUser().isDefaultProfile());
-                    users.setCreatedAt(status.getUser().getCreatedAt().toString());
-                    users.setFavouritesCount(status.getUser().getFavouritesCount());
-                    users.setFollowersCount(status.getUser().getFollowersCount());
-                    users.setFriendsCount(status.getUser().getFriendsCount());
-                    users.setGeoEnabled(status.getUser().isGeoEnabled());
-                    users.setIsTranslator(status.getUser().isTranslator());
-                    users.setLang(status.getUser().getLang());
-                    users.setListedCount(status.getUser().getListedCount());
-                    users.setNDescription(status.getUser().getDescription());
-                    users.setNFollowRequestSent(status.getUser().isFollowRequestSent());
-                    users.setNLocation(status.getUser().getLocation());
-                    //TODO Notifications Deprecated, delete from database
-                    //users.setNNotifications(status.getUser().);
-                    users.setNTimeZone(status.getUser().getTimeZone());
-                    users.setNUrl(status.getUser().getURL());
-                    users.setNUtcOffset(status.getUser().getUtcOffset());
-                    users.setProfileBackgroundColor(status.getUser().getProfileBackgroundColor());
-                    users.setProfileBackgroundImageUrl(status.getUser().getProfileBackgroundImageURL());
-                    users.setProfileBackgroundImageUrlHttps(status.getUser().getProfileBackgroundImageUrlHttps());
-                    //TODO delete from DB
-                   // users.setProfileBackgroundTile(status.getUser().getProfileB);
-                    users.setProfileBannerUrl(status.getUser().getProfileBannerURL());
-                    users.setProfileImageUrl(status.getUser().getProfileImageURL());
-                    users.setProfileImageUrlHttps(status.getUser().getProfileImageURLHttps());
-                    users.setProfileLinkColor(status.getUser().getProfileLinkColor());
-                    users.setProfileSidebarBorderColor(status.getUser().getProfileSidebarBorderColor());
-                    users.setProfileSidebarFillColor(status.getUser().getProfileSidebarFillColor());
-                    users.setProfileTextColor(status.getUser().getProfileTextColor());
-                    //TODO does not exist on twitter4j
-                   // users.setProfileUseBackgroundImage(status.getUser().getProfileUs);
-                    users.setProtected_(status.getUser().isProtected());
-                    users.setScreenName(status.getUser().getScreenName());
-                    users.setStatusesCount(status.getUser().getStatusesCount());
-                   // users.setTweets(null); ??
+                   tweetDTO.setTweetText(status.getText());
                     
-                    users.setVerified(status.getUser().isVerified());                   
-                    usermanager.saveNewPerson(users);     
                     
-            
+                    long t= System.currentTimeMillis();
+                    long end = t+15000;
+                    if(System.currentTimeMillis() < end) {
+                    
+                            synchronized (lock) 
+                            {
+                                lock.notify();
+                            }
+                     System.out.println("unlocked");
+                    }
+                    
+                    //http://stackoverflow.com/questions/18016532/stop-the-twitter-stream-and-return-list-of-status-with-twitter4j
+ 
             }
 
             @Override
@@ -117,12 +100,25 @@ public class TwitterDownloader {
         };// end of statusListener
        
    _twitterStream.addListener(listener); 
-   String[] stringArray = keywords.toArray(new String[keywords.size()]);
-   //String[] keywordsArray = { "greece", "augh" };
+   String[] keywordsArray = new String[keywordsObj.getKeywords().size()];
+   keywordsArray =keywordsObj.getKeywords().toArray(keywordsArray);
+  
    FilterQuery filterQuery = new FilterQuery();
-   filterQuery.track(stringArray);   
+   filterQuery.track(keywordsArray);   
    _twitterStream.filter(filterQuery);
-   
+     
+    try {
+      synchronized (lock) {
+        lock.wait();
+       
+      }
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    System.out.println("returning statuses");
+    _twitterStream.shutdown();
+   return tweetDTO;
     }
     
   
