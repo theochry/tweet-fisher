@@ -3,7 +3,9 @@
 
 package tdao.session;
 import DTO.TweetDTO;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
@@ -21,55 +23,46 @@ import tdao.entities.Tweet;
 public class TwitterDownloader 
 {       
         
-        private final Object lock = new Object();
-
-        private ConfigurationBuilder _cb = new ConfigurationBuilder();
-        private  TwitterStream _twitterStream = new TwitterStreamFactory(_cb.build()).getInstance();
-        
-        private int i = 0;
+        private final Object lock = new Object();    
       
-    public boolean estabConnection()
-    {
-         _cb.setDebugEnabled(true);
-         _cb.setOAuthConsumerKey("VwbqJqEWEGPLI9ZeaeRv8g");
-         _cb.setOAuthConsumerSecret("WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo");
-         _cb.setOAuthAccessToken("988434943-rIdQJQUPnSgRCsoQlbYJCOOAfZ0pe1XUaz8H2RVp");
-         _cb.setOAuthAccessTokenSecret("fftTwvK3K0Ixejhc4007JV6yaXv3KscFpkNsEN6Zc");
-         return true;
-    }
+//    public boolean estabConnection()
+//    {
+//         _cb.setDebugEnabled(true);
+//         _cb.setOAuthConsumerKey("VwbqJqEWEGPLI9ZeaeRv8g");
+//         _cb.setOAuthConsumerSecret("WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo");
+//         _cb.setOAuthAccessToken("988434943-rIdQJQUPnSgRCsoQlbYJCOOAfZ0pe1XUaz8H2RVp");
+//         _cb.setOAuthAccessTokenSecret("fftTwvK3K0Ixejhc4007JV6yaXv3KscFpkNsEN6Zc");
+//         return true;
+//    }
     
     
-    public TweetDTO download( Keywords keywordsObj, final TweetDTO tweetDTO )//?d? ?a d?µ?????e?ta? t? tweetDTO, p?? ?a pe????e? t? tweet, user name etc
-    {
-         //Twitter twitter = new TwitterFactory().getInstance();   
-        
+    public TweetDTO download( String[] keywords, final TweetDTO tweetDTO, TwitterStream twitterStream,final int miliseconds )//?d? ?a d?µ?????e?ta? t? tweetDTO, p?? ?a pe????e? t? tweet, user name etc
+    {    	
             
-          
-            StatusListener listener = new StatusListener() {                 
-                @Override               
+            StatusListener listener = new StatusListener() { 
+               
+               long t= System.currentTimeMillis();          
+               long end = t+miliseconds;
+                @Override         
                 public void onStatus(Status status) {  
                    
-                    UsersManager usermanager = new UsersManagerImpl();//Database
-                    Users users = new Users();
-                    usermanager.saveNewPerson(users);
-                    System.out.println("@=======================>" + status.getUser().getScreenName() + " - " + status.getText() );
+                    TweetDTO tempT = new TweetDTO();
+//                    UsersManager usermanager = new UsersManagerImpl();//Database
+//                    Users users = new Users();
+//                    usermanager.saveNewPerson(users);
+                    System.out.println("@=======================>" + status.getUser().getName() + " - " + status.getText() );
 
-                   tweetDTO.setTweetText(status.getText());
-                    
-                    
-                    long t= System.currentTimeMillis();
-                    long end = t+15000;
-                    if(System.currentTimeMillis() < end) {
-                    
-                            synchronized (lock) 
-                            {
-                                lock.notify();
-                            }
-                     System.out.println("unlocked");
-                    }
-                    
-                    //http://stackoverflow.com/questions/18016532/stop-the-twitter-stream-and-return-list-of-status-with-twitter4j
- 
+                   tempT.setTweetText(status.getText());
+                   tempT.setCreator(status.getUser().getName());
+                   tweetDTO.addTweetDTO(tempT);                 
+                   
+                   if(System.currentTimeMillis() > end) 
+                   {
+                    synchronized (lock) 
+                    {
+                       lock.notify();
+                    }       
+                   }      
             }
 
             @Override
@@ -99,13 +92,10 @@ public class TwitterDownloader
             
         };// end of statusListener
        
-   _twitterStream.addListener(listener); 
-   String[] keywordsArray = new String[keywordsObj.getKeywords().size()];
-   keywordsArray =keywordsObj.getKeywords().toArray(keywordsArray);
-  
+   twitterStream.addListener(listener);   
    FilterQuery filterQuery = new FilterQuery();
-   filterQuery.track(keywordsArray);   
-   _twitterStream.filter(filterQuery);
+   filterQuery.track(keywords);   
+   twitterStream.filter(filterQuery);
      
     try {
       synchronized (lock) {
@@ -117,7 +107,9 @@ public class TwitterDownloader
       e.printStackTrace();
     }
     System.out.println("returning statuses");
-    _twitterStream.shutdown();
+    twitterStream.shutdown();
+    tweetDTO.notifyAlls();
+   System.out.println( "END AT :"+System.currentTimeMillis() );
    return tweetDTO;
     }
     

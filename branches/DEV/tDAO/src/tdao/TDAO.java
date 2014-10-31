@@ -7,8 +7,8 @@
 package tdao;
 
 import tdao.entities.Users;
-import tdao.session.UsersManager;
-import tdao.session.UsersManagerImpl;
+import tdao.session.UsersModelInterface;
+import tdao.session.UsersModelHibernateImpl;
 
 /**
  *
@@ -22,7 +22,7 @@ public class TDAO {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        UsersManager usermanager = new UsersManagerImpl();
+        UsersModelInterface usermanager = new UsersModelHibernateImpl();
  
 Users wanted = usermanager.findByPersonName("Eneng");
  System.out.println( wanted.getId());

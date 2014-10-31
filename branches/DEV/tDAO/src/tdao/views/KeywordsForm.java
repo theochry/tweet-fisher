@@ -7,32 +7,30 @@
 package tdao.views;
 
 
-import DTO.TweetDTO;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import static org.hibernate.util.CollectionHelper.arrayList;
 
 import tdao.controllers.KeywordsController;
-import tdao.controllers.Stream;
 import tdao.dao.Keywords;
-import twitter4j.Status;
-import twitter4j.TwitterException;
 /**
  *
  * @author theodore
  */
-public class KeywordsForm extends javax.swing.JFrame implements Observer{  
+public class KeywordsForm extends javax.swing.JFrame implements Observer, ActionListener{  
   private String _latestKeyword;
   private String _keywordToDelete;
   private ArrayList<String> _keywordsArrayList = new ArrayList<String>();
+  
+  
+    private KeywordsController _keywordsController;
+    public void addController( KeywordsController controller )
+    {
+        _keywordsController = controller;
+    }
 
   public String getKeywordToDelete()
   {
@@ -42,8 +40,10 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer{
     {        
         initComponents();
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        ok.setVisible(false);
-    }    
+        createControls();
+        ok.setVisible(false);       
+    } 
+  
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -92,10 +92,13 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer{
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(1, 1, 1)
-                        .addComponent(removeBtn)
-                        .addGap(68, 68, 68)
-                        .addComponent(ok))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(138, 138, 138)
+                                .addComponent(ok))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(2, 2, 2)
+                                .addComponent(removeBtn))))
                     .addComponent(jLabel1)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(keywordsJtxt, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -108,23 +111,22 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer{
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(keywordsJtxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addKeywordBtn)
-                .addGap(21, 21, 21)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(keywordsJtxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(addKeywordBtn)
+                        .addGap(21, 21, 21)
+                        .addComponent(jLabel2)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(removeBtn))
+                        .addContainerGap(32, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(ok)
-                        .addGap(29, 29, 29))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(12, Short.MAX_VALUE))))
+                        .addGap(29, 29, 29))))
         );
 
         addKeywordBtn.getAccessibleContext().setAccessibleName("addKeywordBtn");
@@ -133,11 +135,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer{
     }// </editor-fold>//GEN-END:initComponents
 
     private void addKeywordBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addKeywordBtnActionPerformed
-       _latestKeyword = keywordsJtxt.getText();
-       keywordsList.add(keywordsJtxt.getText());
-       _keywordsArrayList.add(keywordsJtxt.getText());
-       keywordsJtxt.setText("");
-       ok.doClick();
+       
     }//GEN-LAST:event_addKeywordBtnActionPerformed
 
     private void addKeywordBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addKeywordBtnMouseClicked
@@ -189,8 +187,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer{
 
         
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new KeywordsForm().setVisible(true);
+            public void run() {              
                 
             }
         });
@@ -210,13 +207,8 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer{
 
     @Override
     public void update(Observable obs, Object obj) {
-       System.out.println("update called!"+((Keywords) obs).getState());
-    }
-
-    public void addController(ActionListener controller) {
-        ok.addActionListener(controller);
-        removeBtn.addActionListener(controller);
-    }    
+       System.out.println("KEYWORDS FORM update called!"+((Keywords) obs).getState());      
+    }   
        
     public ArrayList<String> getKeywords()
     {
@@ -226,6 +218,39 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer{
     {
         return _latestKeyword;
     }
+    
+    public void createControls()
+    {
+      ok.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) 
+      {         
+          _keywordsController.setKeyword( getLatestKeyword() );  
+      }  });
+      removeBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) 
+      {         
+          _keywordsController.removeKeyword( _keywordToDelete );  
+      }  });
+      
+      keywordsJtxt.addActionListener(new ActionListener() 
+        {    
+            public void actionPerformed(ActionEvent ae) 
+            {
+                _latestKeyword = keywordsJtxt.getText();
+                keywordsList.add(keywordsJtxt.getText());
+                _keywordsArrayList.add(keywordsJtxt.getText());
+                keywordsJtxt.setText("");
+                ok.doClick();
+            }
+        });     
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
   
-   
+  
+
+
 }

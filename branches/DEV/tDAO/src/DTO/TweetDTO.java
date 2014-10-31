@@ -15,6 +15,7 @@ import java.util.Observable;
  * @author 13
  */
 public class TweetDTO extends Observable {   
+    ArrayList<TweetDTO> _tweetDTOArray = new ArrayList<TweetDTO>();
     private String _tweetText;
     private String _author;
     
@@ -36,7 +37,29 @@ public class TweetDTO extends Observable {
     public void setCreator( String author ) 
     {
         _author = author;
+        
+    }
+    
+    public void addTweetDTO( TweetDTO tweetDTO )
+    {
+        _tweetDTOArray.add(tweetDTO);
+        
+    }
+    public void clearTheTweetDTO()
+    {
+        _tweetDTOArray.clear();
+    }
+    public void notifyAlls()
+    {
         changeState();
+    }
+    public TweetDTO getTweetDTO()
+    {
+        return this;
+    }
+    public ArrayList< TweetDTO > getTweetDTOArray()
+    {
+        return _tweetDTOArray;
     }
     public void changeState() {
        

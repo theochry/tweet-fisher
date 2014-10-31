@@ -55,5 +55,11 @@ public class Keywords extends Observable{
         }
         return tf;
     }
+    
+    public String[] getArrayOfKeywords()
+    {
+        String[] keywordsArray = new String[_keywords.size()];
+        return _keywords.toArray(keywordsArray);
+    }
   
 }
