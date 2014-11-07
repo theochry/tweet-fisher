@@ -8,7 +8,7 @@ package tdao.controllers;
 
 import DTO.TweetDTO;
 import java.util.Observer;
-import tdao.views.ResultsForm;
+import tdao.views.MainForm;
 
 /**
  *
@@ -17,10 +17,10 @@ import tdao.views.ResultsForm;
 public class ResultsController 
 {
     private TweetDTO _model;
-    private ResultsForm _view;   
+    private MainForm _view;   
     public ResultsController(){}
     
-    public ResultsController(TweetDTO model, ResultsForm view) {
+    public ResultsController(TweetDTO model, MainForm view) {
         _model = model;
         _view = view;
         _model.addObserver((Observer) view);

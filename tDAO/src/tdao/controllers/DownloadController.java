@@ -7,38 +7,47 @@
 package tdao.controllers;
 
 import DTO.TweetDTO;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import tdao.auth.TwitterAuth;
 import tdao.dao.Keywords;
 import tdao.session.TwitterDownloader;
 
-import tdao.views.KeywordsForm;
 
 /**
- *
- * @author theodore
+ * This class controls the download process 
+ * @author Theodore Chrysochoidis
  */
 public class DownloadController 
 {
    
    private TwitterDownloader _twitterDownloader = new TwitterDownloader();
-   private Keywords _modelKeywords;  
+   private Keywords _keywords;  
    private TweetDTO _tweetDTO;
    private TwitterAuth _twitterAuth = TwitterAuth.getSingletonInstance();
    
    
-   public DownloadController(Keywords model,  TweetDTO tweetDTO) 
+   public DownloadController(Keywords keywords,  TweetDTO tweetDTO) 
    {
-       _modelKeywords = model;         
+       _keywords = keywords;         
         tweetDTO.clearTheTweetDTO();
         _tweetDTO = tweetDTO;       
     }   
-      
-   public void startDownload( int miliseconds, String[] keywords )
+     
+   /**
+    * 
+    * @param miliseconds
+    *       The given window time (int)
+    * @param keywords 
+    *       Keywords to monitor (String[])
+    * @return true/false
+    */
+   public boolean startDownload( int miliseconds, String[] keywords )
    {   
+       if ( miliseconds < 1 || 0 == keywords.length )
+       {
+           return false;
+       }
        _tweetDTO.clearTheTweetDTO();
-       _tweetDTO=_twitterDownloader.download( keywords, _tweetDTO, _twitterAuth.getTwitterStream(), miliseconds );                
+       _tweetDTO = _twitterDownloader.download( keywords, _tweetDTO, _twitterAuth.getTwitterStream(), miliseconds ); 
+       return true;
    }    
 }//end of DownloadController

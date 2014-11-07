@@ -11,31 +11,50 @@ import java.util.Observer;
 import tdao.dao.Keywords;
 import tdao.views.KeywordsForm;
 
-/**
+/** 
+ * This class is the controller of keywords model
  *
- * @author theodore */
-public class KeywordsController{ 
-    private Keywords _model;
-    private KeywordsForm _view;   
+ * @author Theodore Chrysochoidis 
+ */
+public class KeywordsController
+{ 
+    private Keywords _keywords;
+    private KeywordsForm _keywordsForm;   
     public KeywordsController(){}
     
-    public KeywordsController(Keywords model, KeywordsForm view) {
-        _model = model;
-        _view = view;
-        _model.addObserver((Observer) view);
+    public KeywordsController(Keywords model, KeywordsForm view) 
+    {
+        _keywords = model;
+        _keywordsForm = view;
+        _keywords.addObserver((Observer) view);
     }
     public void setKeyword( String keyword )
     {        
-       _model.setKeyword(keyword);
+       _keywords.setKeyword(keyword);
     }
     public ArrayList<String> getKeywords()
     {
-        return _model.getKeywords();
+        return _keywords.getKeywords();
     }       
 
+    /**
+     * Removes the given keyword
+     * @param keyword
+     * @return true/false
+     */
     public boolean removeKeyword ( String keyword )
     {
-       return _model.removeKeyword(keyword);
-    }  
+       return _keywords.removeKeyword(keyword);
+    } 
+    /**
+     * Checks if the given keyword already exist
+     * @param keyword
+     *      The keyword to be checked (String)
+     * @return true/false
+     */
+    public boolean keywordExist( String keyword )
+    {
+        return _keywords.keywordExist(keyword);
+    }
     
 }

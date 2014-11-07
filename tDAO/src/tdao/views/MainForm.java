@@ -7,18 +7,15 @@
 package tdao.views;
 
 import DTO.TweetDTO;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 import tdao.controllers.DownloadController;
 import tdao.controllers.KeywordsController;
 import tdao.controllers.ResultsController;
@@ -46,6 +43,9 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public static DownloadController _downloadController;
     public static ResultsController _resultsController;
     
+    //others
+     DefaultTableModel _model;
+    
        MainForm(Keywords keywords){
         this._keywordsModel = keywords;
     }
@@ -54,18 +54,19 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     
     public MainForm() 
     {
-        initComponents();
+        initComponents();       
         createControls();
+        _model = (DefaultTableModel) resultsTable.getModel();        
         ButtonGroup buttonGroup = new ButtonGroup();        
         buttonGroup.add(orRB);
-        buttonGroup.add(andRB);
+        buttonGroup.add(andRB); 
     }
     
    public void createControls()
   {       
         searchKeywordsJmenu.addActionListener(new MenuKeywordListener());      
         resultsJmenu.addActionListener(new MenuResultsListener());
-        startBtn.addActionListener ( new DownloadListener() );       
+        startBtn.addActionListener ( new DownloadListener() );         
    }
    
     public Keywords getKeywords()
@@ -115,6 +116,10 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         secondsSpinner = new javax.swing.JSpinner();
         jLabel2 = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
+        resultsPanel = new java.awt.Panel();
+        jLabel3 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        resultsTable = new javax.swing.JTable();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -182,7 +187,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                 .addGap(51, 51, 51))
         );
 
-        secondsSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(60), Integer.valueOf(0), null, Integer.valueOf(1)));
+        secondsSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(60), Integer.valueOf(1), null, Integer.valueOf(1)));
 
         jLabel2.setText("Give a window time in seconds [ default is 60 ]:");
 
@@ -212,6 +217,43 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel3.setText("Results");
+
+        resultsTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Author", "Text"
+            }
+        ));
+        jScrollPane1.setViewportView(resultsTable);
+
+        javax.swing.GroupLayout resultsPanelLayout = new javax.swing.GroupLayout(resultsPanel);
+        resultsPanel.setLayout(resultsPanelLayout);
+        resultsPanelLayout.setHorizontalGroup(
+            resultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(resultsPanelLayout.createSequentialGroup()
+                .addGroup(resultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(resultsPanelLayout.createSequentialGroup()
+                        .addGap(270, 270, 270)
+                        .addComponent(jLabel3))
+                    .addGroup(resultsPanelLayout.createSequentialGroup()
+                        .addGap(89, 89, 89)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 575, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(47, Short.MAX_VALUE))
+        );
+        resultsPanelLayout.setVerticalGroup(
+            resultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(resultsPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         jMenu1.setText("File");
@@ -270,27 +312,32 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(startBtn)
-                .addGap(60, 60, 60))
             .addGroup(layout.createSequentialGroup()
                 .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(351, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(startBtn))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addComponent(resultsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(59, 59, 59)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 85, Short.MAX_VALUE)
-                .addComponent(startBtn)
-                .addGap(23, 23, 23))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(startBtn))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(resultsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(56, Short.MAX_VALUE))
         );
 
         pack();
@@ -333,7 +380,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         _mainForm = new MainForm();
         KeywordsController keywordsController = new KeywordsController( _keywordsModel, _keywordsFormView );
          _downloadController = new DownloadController( _keywordsModel, _tweetDTO ); 
-        _resultsController = new ResultsController ( _tweetDTO, _resultsFormView );   
+        _resultsController = new ResultsController ( _tweetDTO, _mainForm );   
         
         _keywordsFormView.addController( keywordsController );       
         _keywordsModel.addObserver( _mainForm );  
@@ -354,6 +401,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
@@ -364,12 +412,15 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem9;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private java.awt.List keywordsList;
     private java.awt.Panel keywordsPanel;
     private javax.swing.JRadioButton orRB;
     private javax.swing.JMenuItem resultsJmenu;
+    private java.awt.Panel resultsPanel;
+    private javax.swing.JTable resultsTable;
     private javax.swing.JMenu searchJmenu;
     private javax.swing.JMenuItem searchKeywordsJmenu;
     private javax.swing.JSpinner secondsSpinner;
@@ -380,16 +431,44 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
 
     //auto to update kaleitai gia kathe notify apo opoiondhpote typo antikeimenou
     public void update(Observable obs, Object x) {
-   
-        if(obs instanceof Keywords)
-        {
-             MainForm mf = MainForm.getSingletonInstance();    
-             mf.keywordsList.add(((Keywords) obs).getState());               
+         MainForm mf = MainForm.getSingletonInstance();
+        if( obs instanceof Keywords && ((Keywords) obs).getState() == "add" )
+        {                
+             mf.keywordsList.add(((Keywords) obs).getLatestKeyword());               
         }
-        else 
-        {
-            System.out.println("change state tweetDTO");
+        else if ( obs instanceof Keywords && ((Keywords) obs).getState() == "remove")
+        {           
+            mf.keywordsList.remove(((Keywords) obs).getKeywordToDelete());
         }
+        if ( obs instanceof TweetDTO)
+        {                  
+           showResults();
+        }
+//        else 
+//        {
+//            System.out.println("change state tweetDTO");
+//        }
+    }
+     public void showResults()
+    {        
+        
+        ArrayList <TweetDTO> tempDTO =  _tweetDTO.getTweetDTOArray();
+        if ( !tempDTO.isEmpty() )
+        {       
+            Iterator< TweetDTO > it = tempDTO.iterator();
+            _model.setRowCount(0);
+            int currentElement = 0;           
+            for ( currentElement = 0; currentElement < tempDTO.size(); currentElement++ )
+           {
+                _model.insertRow(_model.getRowCount(), new Object[]{ tempDTO.get(currentElement).getCreator(), tempDTO.get(currentElement).getTweetText()});  
+           }
+           
+        }//end of if
+        else
+        {
+           JOptionPane.showMessageDialog(null,"No results to show","No results",JOptionPane.WARNING_MESSAGE);
+        }
+       
     }
    
     //http://stackoverflow.com/questions/19407038/java-actionlistener-actionperformed-in-different-class
@@ -403,13 +482,33 @@ class MenuKeywordListener implements ActionListener {
     }   
 }
 
-class MenuResultsListener implements ActionListener {
-    
+class MenuResultsListener implements ActionListener 
+{
+    public void showResults()
+    {        
+        resultsPanel.setVisible(true);
+        ArrayList <TweetDTO> tempDTO =  _tweetDTO.getTweetDTOArray();
+        if ( !tempDTO.isEmpty() )
+        {       
+            Iterator< TweetDTO > it = tempDTO.iterator();
+            _model.setRowCount(0);
+            int currentElement = 0;
+            System.out.println("results are: "+tempDTO.size());
+            for ( currentElement = 0; currentElement < tempDTO.size(); currentElement++ )
+           {
+                _model.insertRow(_model.getRowCount(), new Object[]{ tempDTO.get(currentElement).getTweetText(), tempDTO.get(currentElement).getCreator()});  
+           }
+           
+        }//end of if
+        else
+        {
+           JOptionPane.showMessageDialog(null,"No results to show","No results",JOptionPane.WARNING_MESSAGE);
+        }
+       
+    }
     public void actionPerformed(ActionEvent e) 
     {       
-        MainForm mf = MainForm.getSingletonInstance();        
-        mf.getResultsFormView().setVisible(true);
-        _resultsFormView.showResults();
+        showResults();
     }   
 }
 
@@ -419,11 +518,35 @@ class DownloadListener implements ActionListener {
                
     public void actionPerformed(ActionEvent e) 
     {   
-        String[] items = keywordsList.getSelectedItems();
-        
-        MainForm mf = MainForm.getSingletonInstance();      
-        _downloadController.startDownload( mf.getSeconds() * 1000, items );
-    }  
+        String[] keywords = keywordsList.getSelectedItems();
+        MainForm mf = MainForm.getSingletonInstance();  
+        if ( keywords.length < 1 )
+        {
+            JOptionPane.showMessageDialog(null,"You didn't choose any keywords","Choose a keyword",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+           
+        if ( orRB.isSelected() )
+        {          
+            _downloadController.startDownload( mf.getSeconds() * 1000, keywords );
+        }
+        else if ( andRB.isSelected() )
+        {            
+             _downloadController.startDownload( mf.getSeconds() * 1000, AndOperator( keywords ) ); 
+        }
+            
+     } 
+    public String[] AndOperator ( String[] keywords )
+    {
+        String concatKeywords = new String();
+        String[] keywordsArray = new String[1];
+        for( int i = 0; i < keywords.length; i++)
+        {
+            concatKeywords = concatKeywords +" "+ keywords[i];
+        }
+        keywordsArray[0] = concatKeywords;      
+        return keywordsArray;
+    }
 }
 
 }
