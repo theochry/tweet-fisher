@@ -7,17 +7,21 @@
 package DTO;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
+import tdao.entities.Tweet;
+import twitter4j.User;
 
 /**
  *
  * @author 13
  */
 public class TweetDTO extends Observable {   
-    ArrayList<TweetDTO> _tweetDTOArray = new ArrayList<TweetDTO>();
+    ArrayList<TweetDTO> _tweetDTOArray = new ArrayList< TweetDTO >();
     private String _tweetText;
     private String _author;
+    private Tweet _tweet;//TODO
+    private User _user;//TODO
+   
     
     public String getTweetText()
     {

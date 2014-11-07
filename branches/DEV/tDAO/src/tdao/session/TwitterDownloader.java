@@ -1,68 +1,62 @@
 //https://dev.twitter.com/docs/streaming-apis/parameters#locations get any geotagged tweet
 //https://raw.githubusercontent.com/yusuke/twitter4j/master/twitter4j-examples/src/main/java/twitter4j/examples/stream/PrintSampleStream.java
-
-package tdao.session;
-import DTO.TweetDTO;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Observable;
-import tdao.entities.Users;
-import twitter4j.*;
-import tdao.controllers.KeywordsController;
-import tdao.dao.Keywords;
-import twitter4j.conf.ConfigurationBuilder;
-import tdao.entities.Tweet;
-
 //http://stackoverflow.com/questions/11554672/getting-all-tweets-from-a-country-within-a-time-period-at-java
 //http://stackoverflow.com/questions/18016532/stop-the-twitter-stream-and-return-list-of-status-with-twitter4j
 
 
-public class TwitterDownloader 
+package tdao.session;
+import DTO.TweetDTO;
+import twitter4j.*;
+
+
+
+/** This class is responsible for download the stream of public tweets
+ * 
+ * @author Theodore Chrysochoidis
+ * 
+ */
+public class TwitterDownloader
 {       
-        
-        private final Object lock = new Object();    
-      
-//    public boolean estabConnection()
-//    {
-//         _cb.setDebugEnabled(true);
-//         _cb.setOAuthConsumerKey("VwbqJqEWEGPLI9ZeaeRv8g");
-//         _cb.setOAuthConsumerSecret("WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo");
-//         _cb.setOAuthAccessToken("988434943-rIdQJQUPnSgRCsoQlbYJCOOAfZ0pe1XUaz8H2RVp");
-//         _cb.setOAuthAccessTokenSecret("fftTwvK3K0Ixejhc4007JV6yaXv3KscFpkNsEN6Zc");
-//         return true;
-//    }
-    
-    
-    public TweetDTO download( String[] keywords, final TweetDTO tweetDTO, TwitterStream twitterStream,final int miliseconds )//?d? ?a d?µ?????e?ta? t? tweetDTO, p?? ?a pe????e? t? tweet, user name etc
-    {    	
-            
-            StatusListener listener = new StatusListener() { 
-               
+    private final Object lock = new Object();  
+    /**
+     * This method downloads the public sample of tweets
+     * @param keywords
+     *      Keywords to monitor (String[])
+     * @param tweetDTO
+     *      At the end of the download contains the results (TweetDTO)
+     * @param twitterStream
+     *      The stream of public tweets (TwitterStream)
+     * @param miliseconds
+     *      Time window (int)
+     * @return TweetDTO with downloaded tweets
+     */
+    public TweetDTO download( String[] keywords, final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds )
+    {        
+            StatusListener listener = new StatusListener() 
+            {              
                long t= System.currentTimeMillis();          
                long end = t+miliseconds;
+               
                 @Override         
-                public void onStatus(Status status) {  
+                public void onStatus(Status status) 
+                {                  
+                   //for testing purpose
+                   System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() );
                    
-                    TweetDTO tempT = new TweetDTO();
-//                    UsersManager usermanager = new UsersManagerImpl();//Database
-//                    Users users = new Users();
-//                    usermanager.saveNewPerson(users);
-                    System.out.println("@=======================>" + status.getUser().getName() + " - " + status.getText() );
-
-                   tempT.setTweetText(status.getText());
-                   tempT.setCreator(status.getUser().getName());
-                   tweetDTO.addTweetDTO(tempT);                 
                    
-                   if(System.currentTimeMillis() > end) 
+                   TweetDTO tempT = new TweetDTO();
+                   tempT.setTweetText( status.getText() );
+                   tempT.setCreator( status.getUser().getName() );
+                   tweetDTO.addTweetDTO( tempT );                 
+                   
+                   //if the time window expires then stop streaming
+                   if( System.currentTimeMillis() > end ) 
                    {
-                    synchronized (lock) 
-                    {
-                       lock.notify();
-                    }       
-                   }      
+                        synchronized (lock) 
+                        {
+                            lock.notify();
+                        }       
+                   }    
             }
 
             @Override
@@ -92,26 +86,20 @@ public class TwitterDownloader
             
         };// end of statusListener
        
-   twitterStream.addListener(listener);   
-   FilterQuery filterQuery = new FilterQuery();
-   filterQuery.track(keywords);   
-   twitterStream.filter(filterQuery);
-     
-    try {
-      synchronized (lock) {
-        lock.wait();
-       
-      }
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    System.out.println("returning statuses");
-    twitterStream.shutdown();
-    tweetDTO.notifyAlls();
-   System.out.println( "END AT :"+System.currentTimeMillis() );
-   return tweetDTO;
-    }
-    
-  
-}
+        twitterStream.addListener(listener);   
+        FilterQuery filterQuery = new FilterQuery();
+        filterQuery.track(keywords);   
+        twitterStream.filter(filterQuery);
+        try {
+           synchronized (lock) {
+             lock.wait();
+           }
+         } catch (InterruptedException e) {
+           e.printStackTrace();
+         }
+         System.out.println("returning statuses");
+         twitterStream.shutdown();
+         tweetDTO.notifyAlls();
+         return tweetDTO;
+    }// end of download    
+}//end of TwitterDownload

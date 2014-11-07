@@ -21,12 +21,12 @@ import tdao.dao.Keywords;
  * @author theodore
  */
 public class KeywordsForm extends javax.swing.JFrame implements Observer, ActionListener{  
-  private String _latestKeyword;
-  private String _keywordToDelete;
-  private ArrayList<String> _keywordsArrayList = new ArrayList<String>();
+  public String _latestKeyword;
+  public String _keywordToDelete;
+  public ArrayList<String> _keywordsArrayList = new ArrayList<String>();
   
   
-    private KeywordsController _keywordsController;
+    public KeywordsController _keywordsController;
     public void addController( KeywordsController controller )
     {
         _keywordsController = controller;
@@ -40,8 +40,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
     {        
         initComponents();
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        createControls();
-        ok.setVisible(false);       
+        createControls();       
     } 
   
     @SuppressWarnings("unchecked")
@@ -53,7 +52,6 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
         keywordsList = new java.awt.List();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        ok = new javax.swing.JButton();
         removeBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -74,14 +72,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
 
         jLabel2.setText("Added keywords");
 
-        ok.setText("ok");
-
         removeBtn.setText("remove");
-        removeBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeBtnActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -92,41 +83,30 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(138, 138, 138)
-                                .addComponent(ok))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addComponent(removeBtn))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(removeBtn))
                     .addComponent(jLabel1)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(keywordsJtxt, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(addKeywordBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jLabel2))
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(196, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(keywordsJtxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(addKeywordBtn)
-                        .addGap(21, 21, 21)
-                        .addComponent(jLabel2)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(removeBtn))
-                        .addContainerGap(32, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(ok)
-                        .addGap(29, 29, 29))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(keywordsJtxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(addKeywordBtn)
+                .addGap(21, 21, 21)
+                .addComponent(jLabel2)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(removeBtn))
+                .addContainerGap(32, Short.MAX_VALUE))
         );
 
         addKeywordBtn.getAccessibleContext().setAccessibleName("addKeywordBtn");
@@ -142,20 +122,6 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
      
        
     }//GEN-LAST:event_addKeywordBtnMouseClicked
-
-    private void removeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeBtnActionPerformed
-       String item = keywordsList.getSelectedItem();
-       if ( item != null )
-       {
-            _keywordToDelete = item;
-            keywordsList.remove(item);
-       }
-       else
-       {
-          JOptionPane.showMessageDialog(null,"You didn't choose any keywords","Choose a keyword",JOptionPane.WARNING_MESSAGE);
-       }
-       
-    }//GEN-LAST:event_removeBtnActionPerformed
 
     
     /**
@@ -201,7 +167,6 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField keywordsJtxt;
     private java.awt.List keywordsList;
-    private javax.swing.JButton ok;
     private javax.swing.JButton removeBtn;
     // End of variables declaration//GEN-END:variables
 
@@ -220,29 +185,9 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
     }
     
     public void createControls()
-    {
-      ok.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) 
-      {         
-          _keywordsController.setKeyword( getLatestKeyword() );  
-      }  });
-      removeBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent event) 
-      {         
-          _keywordsController.removeKeyword( _keywordToDelete );  
-      }  });
-      
-      keywordsJtxt.addActionListener(new ActionListener() 
-        {    
-            public void actionPerformed(ActionEvent ae) 
-            {
-                _latestKeyword = keywordsJtxt.getText();
-                keywordsList.add(keywordsJtxt.getText());
-                _keywordsArrayList.add(keywordsJtxt.getText());
-                keywordsJtxt.setText("");
-                ok.doClick();
-            }
-        });     
+    {      
+      removeBtn.addActionListener(new RemoveKeywordListener() );      
+      keywordsJtxt.addActionListener(new AddKeywordListener());  
     }
 
     @Override
@@ -250,6 +195,49 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
   
+    class RemoveKeywordListener implements ActionListener
+    {       
+        public void actionPerformed(ActionEvent e) 
+        {
+           
+            String item = keywordsList.getSelectedItem();
+            if ( item != null )
+            {
+                 _keywordToDelete = item;
+                 keywordsList.remove(item);
+                 _keywordsController.removeKeyword( _keywordToDelete );
+            }
+            else
+            {
+               JOptionPane.showMessageDialog(null,"You didn't choose any keywords","Choose a keyword",JOptionPane.WARNING_MESSAGE);
+            }
+        }        
+    }
+    
+    class AddKeywordListener implements ActionListener
+    {
+
+        @Override
+        public void actionPerformed(ActionEvent e) 
+        {
+            _latestKeyword = keywordsJtxt.getText();
+                
+            if ( _keywordsController.keywordExist( _latestKeyword ) )
+            {
+                JOptionPane.showMessageDialog(null,"The keyword " +_latestKeyword +" already exist","Keyword Already exist",JOptionPane.WARNING_MESSAGE);
+                keywordsJtxt.setText("");
+                return;
+            } 
+            else if ( !_keywordsController.keywordExist( _latestKeyword ))
+            {
+                keywordsList.add(keywordsJtxt.getText());
+                _keywordsArrayList.add(keywordsJtxt.getText());
+                keywordsJtxt.setText("");
+                _keywordsController.setKeyword( getLatestKeyword() ); 
+            }       
+        }
+        
+    }
   
 
 

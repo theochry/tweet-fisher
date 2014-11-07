@@ -21,11 +21,12 @@ public class TwitterAuth
     private  TwitterStream _twitterStream = new TwitterStreamFactory(_conficurationBuilder.build()).getInstance(); 
     private static TwitterAuth _twitterAuth;
     
+    
     public static TwitterAuth getSingletonInstance()
     {
         if ( null == _twitterAuth )
         {
-            _twitterAuth = new TwitterAuth();
+            _twitterAuth = new TwitterAuth();             
         }
         return _twitterAuth;
     }
