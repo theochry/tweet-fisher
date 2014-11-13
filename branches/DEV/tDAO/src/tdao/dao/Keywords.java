@@ -23,9 +23,13 @@ public class Keywords extends Observable{
     public void setKeyword( String keyword )
     {
         _state = null;
-        _keywords.add( keyword );
-        _state = "add";
-        changeState();
+        if ( checkKeywordPattern ( keyword ) )
+        {
+            _keywords.add( keyword );
+            _state = "add";
+            changeState();
+        }
+        
     }
     public ArrayList<String> getKeywords()
     {
@@ -92,6 +96,13 @@ public class Keywords extends Observable{
     public boolean keywordExist( String keyword )
     {
        return _keywords.contains(keyword);
+    }
+    public boolean checkKeywordPattern( String keyword )
+    {
+        String pattern = "[a-zA-Z0-9]*";
+        if ( keyword.matches(pattern) )
+            return true;
+        return false;
     }
   
 }
