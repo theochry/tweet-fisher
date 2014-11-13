@@ -228,12 +228,21 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
                 keywordsJtxt.setText("");
                 return;
             } 
-            else if ( !_keywordsController.keywordExist( _latestKeyword ))
+            else if ( !_keywordsController.keywordExist( _latestKeyword )  )
             {
-                keywordsList.add(keywordsJtxt.getText());
-                _keywordsArrayList.add(keywordsJtxt.getText());
-                keywordsJtxt.setText("");
-                _keywordsController.setKeyword( getLatestKeyword() ); 
+                if (  _keywordsController.checkKeywordPattern( _latestKeyword ) )
+                {
+                    keywordsList.add(keywordsJtxt.getText());
+                    _keywordsArrayList.add(keywordsJtxt.getText());
+                    keywordsJtxt.setText("");
+                    _keywordsController.setKeyword( _latestKeyword );
+                }             
+                else
+                {
+                    keywordsJtxt.setText("");
+                    JOptionPane.showMessageDialog(null,"The keyword " +_latestKeyword +" contains no english characters","Try another keyword",JOptionPane.WARNING_MESSAGE);
+
+                }
             }       
         }
         

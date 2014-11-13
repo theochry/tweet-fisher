@@ -9,13 +9,19 @@ package tdao.views;
 import DTO.TweetDTO;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.TimeZone;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import tdao.controllers.DownloadController;
 import tdao.controllers.KeywordsController;
 import tdao.controllers.ResultsController;
@@ -384,7 +390,12 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         
         _keywordsFormView.addController( keywordsController );       
         _keywordsModel.addObserver( _mainForm );  
-        _tweetDTO.addObserver( _mainForm );      
+        _tweetDTO.addObserver( _mainForm );         
+      
+        final Date currentTime = new Date();
+        final SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        System.out.println("UTC time: " + sdf.format(currentTime));
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -456,6 +467,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         if ( !tempDTO.isEmpty() )
         {       
             Iterator< TweetDTO > it = tempDTO.iterator();
+             System.out.println("results are: "+tempDTO.size());
             _model.setRowCount(0);
             int currentElement = 0;           
             for ( currentElement = 0; currentElement < tempDTO.size(); currentElement++ )
@@ -487,7 +499,7 @@ class MenuResultsListener implements ActionListener
     public void showResults()
     {        
         resultsPanel.setVisible(true);
-        ArrayList <TweetDTO> tempDTO =  _tweetDTO.getTweetDTOArray();
+        ArrayList <TweetDTO> tempDTO =  _tweetDTO.getTweetDTOArray();  
         if ( !tempDTO.isEmpty() )
         {       
             Iterator< TweetDTO > it = tempDTO.iterator();

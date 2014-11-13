@@ -28,9 +28,14 @@ public class KeywordsController
         _keywordsForm = view;
         _keywords.addObserver((Observer) view);
     }
-    public void setKeyword( String keyword )
-    {        
-       _keywords.setKeyword(keyword);
+    public boolean setKeyword( String keyword )
+    { 
+       if ( _keywords.checkKeywordPattern( keyword ) )
+       {
+            _keywords.setKeyword(keyword);
+            return true;
+       }
+       return false;
     }
     public ArrayList<String> getKeywords()
     {
@@ -55,6 +60,10 @@ public class KeywordsController
     public boolean keywordExist( String keyword )
     {
         return _keywords.keywordExist(keyword);
+    }
+    public boolean checkKeywordPattern ( String keyword )
+    {
+        return _keywords.checkKeywordPattern( keyword );
     }
     
 }
