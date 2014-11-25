@@ -8,16 +8,12 @@ package tdao.utils;
 
 /**
  *
- * @author theodore
+ * @author  Theodore Chrysochoidis
  */
 import org.hibernate.Session;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.SessionFactory;
  
-/**
-*
-* @author leonidas
-*/
 public class HibernateUtil {
  
 private static final SessionFactory sessionFactory;

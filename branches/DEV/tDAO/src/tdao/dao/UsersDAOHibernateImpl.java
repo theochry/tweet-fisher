@@ -8,7 +8,7 @@ package tdao.dao;
 
 /**
  *
- * @author theodore
+ * @author  Theodore Chrysochoidis
  */
 
 

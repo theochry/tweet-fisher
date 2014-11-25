@@ -8,7 +8,7 @@ package tdao.session;
 
 /**
  *
- * @author theodore
+ * @author  Theodore Chrysochoidis
  */
 
 

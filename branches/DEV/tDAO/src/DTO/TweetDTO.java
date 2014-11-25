@@ -6,17 +6,20 @@
 
 package DTO;
 
-import java.util.ArrayList;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import java.util.Observable;
+
 import tdao.entities.Tweet;
 import twitter4j.User;
 
 /**
  *
- * @author 13
+ * @author Theodore Chrysochoidis
  */
-public class TweetDTO extends Observable {   
-    ArrayList<TweetDTO> _tweetDTOArray = new ArrayList< TweetDTO >();
+public class TweetDTO extends Observable 
+{  
+    private Multimap<String, TweetDTO> _keywordsTweetDTOHashmap = HashMultimap.create();
     private String _tweetText;
     private String _author;
     private Tweet _tweet;//TODO
@@ -44,16 +47,16 @@ public class TweetDTO extends Observable {
         
     }
     
-    public void addTweetDTO( TweetDTO tweetDTO )
+    public void addTweetDTO( String keyword, TweetDTO tweetDTO )
     {
-        _tweetDTOArray.add(tweetDTO);
+        _keywordsTweetDTOHashmap.put(keyword, tweetDTO);
         
     }
     public void clearTheTweetDTO()
     {
-        _tweetDTOArray.clear();
+        _keywordsTweetDTOHashmap.clear();
     }
-    public void notifyAlls()
+    public void notifyAllObservers()
     {
         changeState();
     }
@@ -61,15 +64,17 @@ public class TweetDTO extends Observable {
     {
         return this;
     }
-    public ArrayList< TweetDTO > getTweetDTOArray()
+    public  Multimap<String, TweetDTO> getTweetDtoMultiHash()
     {
-        return _tweetDTOArray;
+        return _keywordsTweetDTOHashmap;
     }
     public void changeState() {
        
         setChanged();
         notifyObservers();
     }
+    
+    
     
     //XWRIS getState()
 }

@@ -47,7 +47,7 @@ public class DownloadController
            return false;
        }
        _tweetDTO.clearTheTweetDTO();
-       _tweetDTO = _twitterDownloader.download( keywords, _tweetDTO, _twitterAuth.getTwitterStream(), miliseconds ); 
+       _tweetDTO = _twitterDownloader.download( _tweetDTO, _twitterAuth.getTwitterStream(), miliseconds, _keywords ); 
        return true;
    }    
 }//end of DownloadController

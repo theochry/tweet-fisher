@@ -37,6 +37,7 @@ public class KeywordsController
        }
        return false;
     }
+    
     public ArrayList<String> getKeywords()
     {
         return _keywords.getKeywords();
@@ -66,4 +67,21 @@ public class KeywordsController
         return _keywords.checkKeywordPattern( keyword );
     }
     
+    public boolean setOccurences ( int occurences )
+    {
+        return _keywords.setOccurences ( occurences );
+    }
+    
+    public boolean setTimeInterval ( int timeInterval )
+    {
+        return _keywords.setTimeInterval ( timeInterval );
+    }
+    public int getTimeInteval()
+    {
+        return _keywords.getTimeInterval();
+    }
+    public int getOccurences()
+    {
+        return _keywords.getOccurences();
+    }
 }

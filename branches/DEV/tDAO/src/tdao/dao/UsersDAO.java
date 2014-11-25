@@ -8,16 +8,12 @@ package tdao.dao;
 
 /**
  *
- * @author theodore
+ * @author  Theodore Chrysochoidis
  */
 
 import tdao.entities.Users;
-import java.math.BigDecimal;
- 
-/**
- *
- * @author leonidas
- */
+import java.math.BigDecimal; 
+
 public interface UsersDAO extends GenericDAO<Users, BigDecimal> {
     public Users findByName(String name);
     
