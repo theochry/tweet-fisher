@@ -7,6 +7,9 @@
 package tdao.views;
 
 
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -18,7 +21,7 @@ import tdao.controllers.KeywordsController;
 import tdao.dao.Keywords;
 /**
  *
- * @author theodore
+ * @author  Theodore Chrysochoidis
  */
 public class KeywordsForm extends javax.swing.JFrame implements Observer, ActionListener{  
   public String _latestKeyword;
@@ -40,9 +43,19 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
     {        
         initComponents();
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        createControls();       
+        createControls();
+        centerFrame();        
     } 
-  
+   private void centerFrame() 
+   {
+       Dimension windowSize = getSize();
+       GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+       Point centerPoint = ge.getCenterPoint();
+       int dx = centerPoint.x - windowSize.width / 2;
+       int dy = centerPoint.y - windowSize.height / 2;    
+       setLocation(dx, dy);
+       setResizable(false);
+    }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -68,7 +81,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
             }
         });
 
-        jLabel1.setText("Add a keyword and press add");
+        jLabel1.setText("Type a keyword and press add or enter");
 
         jLabel2.setText("Added keywords");
 
@@ -90,7 +103,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
                         .addComponent(keywordsJtxt, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(addKeywordBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jLabel2))
-                .addContainerGap(196, Short.MAX_VALUE))
+                .addContainerGap(188, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -235,7 +248,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
                     keywordsList.add(keywordsJtxt.getText());
                     _keywordsArrayList.add(keywordsJtxt.getText());
                     keywordsJtxt.setText("");
-                    _keywordsController.setKeyword( _latestKeyword );
+                    _keywordsController.setKeyword( _latestKeyword );                    
                 }             
                 else
                 {

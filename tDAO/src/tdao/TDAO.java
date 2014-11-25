@@ -12,7 +12,7 @@ import tdao.session.UsersModelHibernateImpl;
 
 /**
  *
- * @author fiontor
+ * @author Theodore Chrysochoidis
  */
 public class TDAO {
 

@@ -7,21 +7,14 @@
 package tdao.views;
 
 import DTO.TweetDTO;
+import com.google.common.collect.Multimap;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.TimeZone;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import tdao.controllers.DownloadController;
 import tdao.controllers.KeywordsController;
 import tdao.controllers.ResultsController;
@@ -30,7 +23,7 @@ import tdao.dao.Keywords;
 
 /**
  *
- * @author theodore
+ * @author  Theodore Chrysochoidis
  */
 
  
@@ -38,11 +31,11 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
   
     //views
     private static MainForm _mainForm;
-    public static KeywordsForm _keywordsFormView = new KeywordsForm();   
-    public static ResultsForm _resultsFormView = new ResultsForm();
+    public static KeywordsForm _keywordsFormView = new KeywordsForm();
+    public static Settings _settingsFormView = new Settings();
     
     //models
-    public static TweetDTO _tweetDTO = new TweetDTO();    
+    public static TweetDTO _tweetDTO = new TweetDTO(); 
     public static Keywords _keywordsModel = new Keywords();
     
     //controllers
@@ -65,13 +58,14 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         _model = (DefaultTableModel) resultsTable.getModel();        
         ButtonGroup buttonGroup = new ButtonGroup();        
         buttonGroup.add(orRB);
-        buttonGroup.add(andRB); 
+        buttonGroup.add(andRB);
+        setResizable(false);
     }
     
    public void createControls()
   {       
         searchKeywordsJmenu.addActionListener(new MenuKeywordListener());      
-        resultsJmenu.addActionListener(new MenuResultsListener());
+        settingsJmenu.addActionListener( new MenuSettingsListener());
         startBtn.addActionListener ( new DownloadListener() );         
    }
    
@@ -85,10 +79,11 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         return _keywordsFormView;
     }  
     
-    public ResultsForm getResultsFormView()
+    public Settings getSettingsFormView()
     {
-        return _resultsFormView;
-    }
+        return _settingsFormView;
+    }   
+   
     public static MainForm getSingletonInstance()
     {
         if ( null == _mainForm )
@@ -134,11 +129,9 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         searchJmenu = new javax.swing.JMenu();
         searchKeywordsJmenu = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
-        jMenuItem6 = new javax.swing.JMenuItem();
+        settingsJmenu = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         resultsJmenu = new javax.swing.JMenuItem();
-        jMenu4 = new javax.swing.JMenu();
-        jMenuItem9 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -248,9 +241,9 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                         .addGap(270, 270, 270)
                         .addComponent(jLabel3))
                     .addGroup(resultsPanelLayout.createSequentialGroup()
-                        .addGap(89, 89, 89)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 575, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(47, Short.MAX_VALUE))
+                        .addGap(42, 42, 42)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 902, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         resultsPanelLayout.setVerticalGroup(
             resultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -258,8 +251,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                 .addContainerGap()
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 374, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jMenu1.setText("File");
@@ -293,8 +286,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         jMenuItem5.setText("Topics");
         searchJmenu.add(jMenuItem5);
 
-        jMenuItem6.setText("Locations");
-        searchJmenu.add(jMenuItem6);
+        settingsJmenu.setText("Settings");
+        searchJmenu.add(settingsJmenu);
 
         jMenuBar1.add(searchJmenu);
 
@@ -304,13 +297,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         jMenu3.add(resultsJmenu);
 
         jMenuBar1.add(jMenu3);
-
-        jMenu4.setText("Time window");
-
-        jMenuItem9.setText("Set time");
-        jMenu4.add(jMenuItem9);
-
-        jMenuBar1.add(jMenu4);
 
         setJMenuBar(jMenuBar1);
 
@@ -329,7 +315,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(2, 2, 2)
                         .addComponent(resultsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(62, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -343,7 +329,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(resultsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(56, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -390,16 +376,10 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         
         _keywordsFormView.addController( keywordsController );       
         _keywordsModel.addObserver( _mainForm );  
-        _tweetDTO.addObserver( _mainForm );         
-      
-        final Date currentTime = new Date();
-        final SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        System.out.println("UTC time: " + sdf.format(currentTime));
-        
+        _tweetDTO.addObserver( _mainForm );       
+        _settingsFormView.addController( keywordsController );       
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                
+            public void run() {              
                  MainForm mf = MainForm.getSingletonInstance();
                  mf.setVisible(true);
                
@@ -415,14 +395,11 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem5;
-    private javax.swing.JMenuItem jMenuItem6;
-    private javax.swing.JMenuItem jMenuItem9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
@@ -435,6 +412,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JMenu searchJmenu;
     private javax.swing.JMenuItem searchKeywordsJmenu;
     private javax.swing.JSpinner secondsSpinner;
+    private javax.swing.JMenuItem settingsJmenu;
     private javax.swing.JButton startBtn;
     private java.awt.Panel windowTimePanel;
     // End of variables declaration//GEN-END:variables
@@ -455,31 +433,31 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         {                  
            showResults();
         }
-//        else 
-//        {
-//            System.out.println("change state tweetDTO");
-//        }
+        
     }
      public void showResults()
-    {        
-        
-        ArrayList <TweetDTO> tempDTO =  _tweetDTO.getTweetDTOArray();
-        if ( !tempDTO.isEmpty() )
-        {       
-            Iterator< TweetDTO > it = tempDTO.iterator();
-             System.out.println("results are: "+tempDTO.size());
-            _model.setRowCount(0);
-            int currentElement = 0;           
-            for ( currentElement = 0; currentElement < tempDTO.size(); currentElement++ )
-           {
-                _model.insertRow(_model.getRowCount(), new Object[]{ tempDTO.get(currentElement).getCreator(), tempDTO.get(currentElement).getTweetText()});  
-           }
+    {
+        Multimap<String, TweetDTO> tempDTO =  _tweetDTO.getTweetDtoMultiHash();       
+        _model.setRowCount(0);
+         if ( !tempDTO.isEmpty() )
+        {             
+            for(TweetDTO value : tempDTO.values()) 
+            {               
+                _model.insertRow(_model.getRowCount(), new Object[]{ value.getCreator(), value.getTweetText()}); 
+                
+            }           
+        }
+         
            
-        }//end of if
         else
         {
            JOptionPane.showMessageDialog(null,"No results to show","No results",JOptionPane.WARNING_MESSAGE);
         }
+          for(String value : tempDTO.keys()) 
+        {
+            System.out.println("MAIN KEYS"+value);
+            
+        } 
        
     }
    
@@ -494,35 +472,7 @@ class MenuKeywordListener implements ActionListener {
     }   
 }
 
-class MenuResultsListener implements ActionListener 
-{
-    public void showResults()
-    {        
-        resultsPanel.setVisible(true);
-        ArrayList <TweetDTO> tempDTO =  _tweetDTO.getTweetDTOArray();  
-        if ( !tempDTO.isEmpty() )
-        {       
-            Iterator< TweetDTO > it = tempDTO.iterator();
-            _model.setRowCount(0);
-            int currentElement = 0;
-            System.out.println("results are: "+tempDTO.size());
-            for ( currentElement = 0; currentElement < tempDTO.size(); currentElement++ )
-           {
-                _model.insertRow(_model.getRowCount(), new Object[]{ tempDTO.get(currentElement).getTweetText(), tempDTO.get(currentElement).getCreator()});  
-           }
-           
-        }//end of if
-        else
-        {
-           JOptionPane.showMessageDialog(null,"No results to show","No results",JOptionPane.WARNING_MESSAGE);
-        }
-       
-    }
-    public void actionPerformed(ActionEvent e) 
-    {       
-        showResults();
-    }   
-}
+
 
 class DownloadListener implements ActionListener {
    
@@ -559,6 +509,16 @@ class DownloadListener implements ActionListener {
         keywordsArray[0] = concatKeywords;      
         return keywordsArray;
     }
+}
+
+class MenuSettingsListener implements ActionListener {
+    
+  public void actionPerformed(ActionEvent e) 
+   {   
+       System.out.println("Sdf");
+        MainForm mf = MainForm.getSingletonInstance();
+        mf.getSettingsFormView().setVisible(true);       
+    }   
 }
 
 }

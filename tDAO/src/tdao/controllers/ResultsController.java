@@ -12,7 +12,7 @@ import tdao.views.MainForm;
 
 /**
  *
- * @author 13
+ * @author  Theodore Chrysochoidis
  */
 public class ResultsController 
 {

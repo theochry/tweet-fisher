@@ -12,7 +12,7 @@ import twitter4j.conf.ConfigurationBuilder;
 
 /**
  *
- * @author 13
+ * @author  Theodore Chrysochoidis
  */
 public class TwitterAuth 
 {

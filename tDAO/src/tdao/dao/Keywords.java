@@ -15,22 +15,22 @@ import java.util.Observable;
  */
 public class Keywords extends Observable{
     
-    private ArrayList<String> _keywords = new ArrayList<String>();
-    private String _state;
-    private String _keywordToDelete = new String();
+    private final ArrayList< String > _keywords = new ArrayList< String >();
+    private int  _occurences;
+    private int _timeInterval;
+    private String _state = null;
+    private String _keywordToDelete = null;
     
     public Keywords() {}
     public void setKeyword( String keyword )
-    {
-        _state = null;
+    {        
         if ( checkKeywordPattern ( keyword ) )
         {
             _keywords.add( keyword );
             _state = "add";
             changeState();
-        }
-        
-    }
+        }        
+    }   
     public ArrayList<String> getKeywords()
     {
         return _keywords;
@@ -38,8 +38,8 @@ public class Keywords extends Observable{
     /**
      * Notify all observers that the state changed
      */
-    public void changeState() {
-       
+    public void changeState() 
+    {      
         setChanged();
         notifyObservers();
     }
@@ -47,7 +47,8 @@ public class Keywords extends Observable{
     * Get the new keyword
     * @return 
     */
-    public String getState() {
+    public String getState() 
+    {
         return _state;      
     }
     public String getLatestKeyword()
@@ -65,9 +66,7 @@ public class Keywords extends Observable{
      * @return true/false
      */
     public boolean removeKeyword( String keyword )
-    {     
-        _state = null;
-        _keywordToDelete = null;      
+    {         
         boolean tf;
         if ( _keywords.isEmpty() )
         {
@@ -99,10 +98,37 @@ public class Keywords extends Observable{
     }
     public boolean checkKeywordPattern( String keyword )
     {
-        String pattern = "[a-zA-Z0-9]*";
+        String pattern = "[a-zA-Z0-9#:)(?]*";
         if ( keyword.matches(pattern) )
             return true;
         return false;
     }
-  
+   public boolean setOccurences( int occurences )
+   {
+        if ( occurences > 0 )
+        {
+            _occurences = occurences;
+            return true;
+        }
+        return false;
+    }
+   public boolean setTimeInterval ( int timeInterval )        
+   {
+        if ( timeInterval > 0 )
+        {
+            _timeInterval = timeInterval;
+            return true;
+        }
+        return false;
+   }
+   public int getOccurences()
+   {
+       return _occurences;
+   }
+   
+   public int getTimeInterval()
+   {
+       return _timeInterval;
+   }
+        
 }

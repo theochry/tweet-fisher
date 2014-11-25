@@ -7,7 +7,11 @@
 package tdao.session;
 
 import DTO.TweetDTO;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import tdao.dao.Keywords;
 import twitter4j.*;
 
 
@@ -20,11 +24,15 @@ import twitter4j.*;
 public class TwitterDownloader
 {       
     private final Object lock = new Object(); 
-    public static int counter = 0;
+    private final HashMap<String, Integer> counterKeywords = new HashMap<String, Integer>();
+    private long startTime;        
+    private long endTime;
+    private long timeWindow; 
+    private  TweetDTO statuses;
+    private final FilterQuery filterQuery = new FilterQuery();
+
     /**
-     * This method downloads the public sample of tweets
-     * @param keywords
-     *      Keywords to monitor (String[])
+     * This method downloads the public sample of tweets     
      * @param tweetDTO
      *      At the end of the download contains the results (TweetDTO)
      * @param twitterStream
@@ -33,51 +41,47 @@ public class TwitterDownloader
      *      Time window (int)
      * @return TweetDTO with downloaded tweets
      */   
-    public TweetDTO download( final String[] keywords, final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds )
-    {       
-            final ArrayList< KeywordOccur > keys = new ArrayList<KeywordOccur>();
-            
-            for( int i = 0 ; i < keywords.length ; i++ )
-            {
-                KeywordOccur ko = new KeywordOccur();
-                ko.setKeyword(keywords[i]);
-                ko.setNumOfOccur(0);
-                keys.add(ko);               
-            }
-            
-            StatusListener listener = new StatusListener() 
-            {              
-               long t= System.currentTimeMillis();          
-               long end = t+miliseconds;
-              
-       
-                @Override         
-                public void onStatus(Status status) 
-                { 
-                    
-                   //for testing purpose
-                   //System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() + "Created at: "+status.getCreatedAt() );
-                   System.out.println( "Created at: "+status.getCreatedAt()+" Tweet Text: " + status.getText()  );                                
-                 
+    public TweetDTO download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords )
+    {      
+        initHashMapOfKeywords (keywords);
+        startTime = System.currentTimeMillis();          
+        endTime = startTime + miliseconds;
+        timeWindow =  startTime + keywords.getTimeInterval();       
+           
+        StatusListener listener = new StatusListener() 
+        {
+            @Override         
+            public void onStatus(Status status) 
+            { 
+                ArrayList<String> reachedKeywords = new ArrayList<String>();                  
+                //for testing purpose
+                //System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() + "Created at: "+status.getCreatedAt() );
+                System.out.println( "Created at: "+status.getCreatedAt()+" Tweet Text: " + status.getText()  );              
+                String containedKeyword = tweetContainsKeyword( keywords,status.getText() );             
+               
+                //Αρχικά μπαίνουν όλα τα statuses, μετά ελέγχεται ποια από αυτά έχουν τα ανάλογα occurences και όσα δεν έχουν, διαγράφονται
+                //και παραμένουν μόνο αυτά που έχουν
+                statuses  = new TweetDTO();
+                statuses.setTweetText( status.getText() );
+                statuses.setCreator( status.getUser().getName() );
+                if ( containedKeyword!= "" )
+                    tweetDTO.getTweetDtoMultiHash().put(containedKeyword, statuses);               
+                
+                  
+                if ( System.currentTimeMillis() > timeWindow )
+                {                                
+                     timeWindow = System.currentTimeMillis() + keywords.getTimeInterval();                    
+                }
+                //for testing purpose
+                if( System.currentTimeMillis() > endTime ) 
+                {                      
+                    synchronized (lock) 
+                    {
+                        lock.notify();
+                    }       
+                }  
                    
-                   tweetContainsKeyword(keywords,status.getText(),keys );                 
-                   
-                   TweetDTO tempT = new TweetDTO();
-                   tempT.setTweetText( status.getText() );
-                   tempT.setCreator( status.getUser().getName() );
-                   tweetDTO.addTweetDTO( tempT );                 
-                   
-                   //if the time window expires then stop streaming
-                   //NEW: reload time window and check the number of occurences for each keyword
-                   if( System.currentTimeMillis() > end ) 
-                   {
-                       
-                        synchronized (lock) 
-                        {
-                            lock.notify();
-                        }       
-                   }    
-            }
+             }
 
             @Override
             public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
@@ -106,11 +110,12 @@ public class TwitterDownloader
             
         };// end of statusListener
        
-        twitterStream.addListener(listener);   
-        FilterQuery filterQuery = new FilterQuery();
+        twitterStream.addListener(listener); 
+        
         String[] lang = { "en" };
         filterQuery.language(lang); 
-        filterQuery.track(keywords);   
+        String [] criteria = getArrayOfKeywords( keywords );
+        filterQuery.track( criteria );   
         twitterStream.filter(filterQuery);        
         try {
            synchronized (lock) {
@@ -120,15 +125,32 @@ public class TwitterDownloader
            e.printStackTrace();
          }
          System.out.println("returning statuses");
-         twitterStream.shutdown();
-         tweetDTO.notifyAlls();
-         for ( int k = 0; k < keys.size(); k++ )
-         {
-              System.out.println("# "+keys.get(k).getKeyword()+"  is: "+ keys.get(k).getNumOfOccur());
-         }
-          System.out.println("Counter is: "+counter);
+         twitterStream.shutdown();     
+         reachedKeywordsTweetDto ( tweetDTO, keywords.getOccurences() );       
+         tweetDTO.notifyAllObservers();        
          return tweetDTO;
+         
     }// end of download 
+    
+    /**
+     * This method get the TweetDTO object and the number of desired occurences
+     * for each keyword. Then searches the TweetDTO MultiMap. If a key of the Multimap has less occurences, then the whole key deleted
+     * @param tweetDto
+     * @param occurences 
+     */
+    public void reachedKeywordsTweetDto( TweetDTO tweetDto, int occurences )
+    {       
+        Multimap<String, TweetDTO> tweetDtoIterator = tweetDto.getTweetDtoMultiHash();    
+        Iterator<String> counterKeywordsIterator = counterKeywords.keySet().iterator();         
+        while( counterKeywordsIterator.hasNext() )
+        {
+          String key = counterKeywordsIterator.next();          
+          if ( counterKeywords.get(key) < occurences )
+          {        
+             tweetDtoIterator.removeAll(key);
+          }         
+        }
+    }//end of reloadTweetDto
     
     /**
      * This method search for given keywords inside a twitter status
@@ -138,60 +160,53 @@ public class TwitterDownloader
      *          The twitter Status (string)
      * @param keys
      *          
-     * @return true/false
+     * @return String [the contained keyword]
      */  
-    public boolean tweetContainsKeyword( String[] keywords, String status, ArrayList< KeywordOccur >  keys  )
+    public String tweetContainsKeyword( Keywords keywords, String status  )
     { 
-         String pattern = "[a-zA-Z0-9]*";
-         //Έλεγχος εισόδου
-         if ( 0 == keywords.length || 0 == status.length() || 0 == keys.size()  )
-         {
-             return false;
-         }
-         for ( int kword = 0; kword < keywords.length; kword++ )
-         {
-             if ( !keywords [kword].matches(pattern) )
-                 return false;
-         }
-         
+         String pattern = "[a-zA-Z0-9#]*";
+         String keyword = "";
          int currentKeyword;  
          String statusCheck = status.toLowerCase(); 
-         for ( currentKeyword = 0 ; currentKeyword < keywords.length; currentKeyword++ )
+         //Έλεγχος εισόδου
+         if ( 0 == keywords.getKeywords().size()|| 0 == status.length()   )
+         {
+             return "";
+         }
+         for ( int kword = 0; kword < keywords.getKeywords().size(); kword++ )
+         {
+             if ( !keywords.getKeywords().get(kword).matches( pattern ) )
+                return "";
+         }         
+         for ( currentKeyword = 0 ; currentKeyword < keywords.getKeywords().size(); currentKeyword++ )
          {                                                          
-            if ( statusCheck.contains( keywords[ currentKeyword ].toLowerCase() ) )
-            {       
-                if( keywords [ currentKeyword ].toLowerCase().contains( keys.get( currentKeyword ).getKeyword().toLowerCase() ) )
-                { 
-                    int occur = keys.get( currentKeyword ).getNumOfOccur();
-                    occur++;
-                    keys.get( currentKeyword ).setNumOfOccur( occur );                         
-                }                                               
-             }
-            counter++;
+            if ( statusCheck.contains( keywords.getKeywords().get( currentKeyword ).toLowerCase() ) )
+            {    
+                //Εάν υπάρχει το keyword στο status, τότε βάλ'το στη λίστα με τα keywords, και αύξησε το μετρητή του keyword
+                keyword = keywords.getKeywords().get( currentKeyword );
+                counterKeywords.put( keyword, counterKeywords.get(keyword) + 1);
+            }           
           }
-         return true;
+         return keyword;        
+    }
+    /**
+     * This method initialize the hashmap of keywords
+     * @param keywords 
+     */
+    
+    public void initHashMapOfKeywords( Keywords keywords )
+    {
+        String[] keywordsArray = getArrayOfKeywords ( keywords );        
+        for ( int kword = 0; kword < keywordsArray.length; kword++ )
+        {
+            counterKeywords.put(keywordsArray[kword], 0);
+        }
     }
     
-    public class KeywordOccur
+    public String[] getArrayOfKeywords( Keywords keywordsObject )
     {
-        String _keyword;
-        int _numOfOccur;
-        public void setKeyword( String keyword )
-        {
-            _keyword = keyword;
-        }
-        public void setNumOfOccur( int numOfOccur )
-        {
-            _numOfOccur = numOfOccur;
-        }
-        public String getKeyword()
-        {
-            return _keyword;
-        }
-        public int getNumOfOccur()
-        {
-            return _numOfOccur;
-        }
-    }
+        String[] keywordsArray = new String[ keywordsObject.getKeywords().size() ];
+        return keywordsObject.getKeywords().toArray( keywordsArray );
+    }       
   
 }//end of TwitterDownload
