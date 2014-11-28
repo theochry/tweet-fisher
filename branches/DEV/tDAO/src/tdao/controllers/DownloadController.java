@@ -22,14 +22,15 @@ public class DownloadController
    private TwitterDownloader _twitterDownloader = new TwitterDownloader();
    private Keywords _keywords;  
    private TweetDTO _tweetDTO;
-   private TwitterAuth _twitterAuth = TwitterAuth.getSingletonInstance();
+   private TwitterAuth _twitterAuth;
    
    
-   public DownloadController(Keywords keywords,  TweetDTO tweetDTO) 
+   public DownloadController(Keywords keywords,  TweetDTO tweetDTO, TwitterAuth twitterAuth ) 
    {
        _keywords = keywords;         
         tweetDTO.clearTheTweetDTO();
-        _tweetDTO = tweetDTO;       
+        _tweetDTO = tweetDTO;   
+        _twitterAuth = twitterAuth;
     }   
      
    /**
@@ -40,8 +41,9 @@ public class DownloadController
     *       Keywords to monitor (String[])
     * @return true/false
     */
-   public boolean startDownload( int miliseconds, String[] keywords )
-   {   
+   
+   public boolean startDownload( int miliseconds, String[] keywords ) 
+   {     
        if ( miliseconds < 1 || 0 == keywords.length )
        {
            return false;
