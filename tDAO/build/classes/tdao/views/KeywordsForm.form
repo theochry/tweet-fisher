@@ -38,7 +38,7 @@
                   </Group>
                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="196" max="32767" attributes="0"/>
+              <EmptySpace pref="188" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -81,7 +81,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Add a keyword and press add"/>
+        <Property name="text" type="java.lang.String" value="Type a keyword and press add or enter"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">

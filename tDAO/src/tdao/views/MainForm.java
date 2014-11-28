@@ -15,8 +15,10 @@ import java.util.Observer;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import tdao.auth.TwitterAuth;
 import tdao.controllers.DownloadController;
 import tdao.controllers.KeywordsController;
+import tdao.controllers.LoginController;
 import tdao.controllers.ResultsController;
 import tdao.dao.Keywords;
 
@@ -33,6 +35,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private static MainForm _mainForm;
     public static KeywordsForm _keywordsFormView = new KeywordsForm();
     public static Settings _settingsFormView = new Settings();
+    public static Login _loginFormView = new Login();
     
     //models
     public static TweetDTO _tweetDTO = new TweetDTO(); 
@@ -41,9 +44,12 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     //controllers
     public static DownloadController _downloadController;
     public static ResultsController _resultsController;
+    public static LoginController _loginController;
     
     //others
      DefaultTableModel _model;
+     public static TwitterAuth _twitterAuth = TwitterAuth.getSingletonInstance();
+     
     
        MainForm(Keywords keywords){
         this._keywordsModel = keywords;
@@ -66,7 +72,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
   {       
         searchKeywordsJmenu.addActionListener(new MenuKeywordListener());      
         settingsJmenu.addActionListener( new MenuSettingsListener());
-        startBtn.addActionListener ( new DownloadListener() );         
+        startBtn.addActionListener ( new DownloadListener() );     
+        loginJmenu.addActionListener( new MenuLoginListener() );
    }
    
     public Keywords getKeywords()
@@ -82,7 +89,12 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public Settings getSettingsFormView()
     {
         return _settingsFormView;
-    }   
+    } 
+    
+    public Login getLoginFormView()
+    {
+        return _loginFormView;
+    }
    
     public static MainForm getSingletonInstance()
     {
@@ -123,7 +135,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         resultsTable = new javax.swing.JTable();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        loginJmenu = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
         searchJmenu = new javax.swing.JMenu();
@@ -257,8 +269,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
 
         jMenu1.setText("File");
 
-        jMenuItem1.setText("Login");
-        jMenu1.add(jMenuItem1);
+        loginJmenu.setText("Login");
+        jMenu1.add(loginJmenu);
 
         jMenuItem2.setText("About");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
@@ -371,12 +383,18 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         //</editor-fold>
         _mainForm = new MainForm();
         KeywordsController keywordsController = new KeywordsController( _keywordsModel, _keywordsFormView );
-         _downloadController = new DownloadController( _keywordsModel, _tweetDTO ); 
+        _loginController = new LoginController ( _twitterAuth, _loginFormView); 
+         _downloadController = new DownloadController( _keywordsModel, _tweetDTO, _twitterAuth ); 
         _resultsController = new ResultsController ( _tweetDTO, _mainForm );   
         
-        _keywordsFormView.addController( keywordsController );       
-        _keywordsModel.addObserver( _mainForm );  
+        
+         _loginFormView.addController(_loginController );
+         
+        _keywordsFormView.addController( keywordsController );      
+        _keywordsModel.addObserver( _mainForm ); 
+        
         _tweetDTO.addObserver( _mainForm );       
+        
         _settingsFormView.addController( keywordsController );       
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {              
@@ -396,7 +414,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem5;
@@ -405,6 +422,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JSeparator jSeparator2;
     private java.awt.List keywordsList;
     private java.awt.Panel keywordsPanel;
+    private javax.swing.JMenuItem loginJmenu;
     private javax.swing.JRadioButton orRB;
     private javax.swing.JMenuItem resultsJmenu;
     private java.awt.Panel resultsPanel;
@@ -514,10 +532,19 @@ class DownloadListener implements ActionListener {
 class MenuSettingsListener implements ActionListener {
     
   public void actionPerformed(ActionEvent e) 
-   {   
-       System.out.println("Sdf");
+   {       
         MainForm mf = MainForm.getSingletonInstance();
         mf.getSettingsFormView().setVisible(true);       
+    }   
+}
+
+
+class MenuLoginListener implements ActionListener {
+    
+  public void actionPerformed(ActionEvent e) 
+   {       
+        MainForm mf = MainForm.getSingletonInstance();
+        mf.getLoginFormView().setVisible(true);       
     }   
 }
 

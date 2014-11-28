@@ -11,7 +11,7 @@
             <Property name="text" type="java.lang.String" value="File"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
+            <MenuItem class="javax.swing.JMenuItem" name="loginJmenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Login"/>
               </Properties>
