@@ -6,9 +6,9 @@
 
 package tdao;
 
-import tdao.entities.Users;
-import tdao.session.UsersModelInterface;
-import tdao.session.UsersModelHibernateImpl;
+import tfisher.entities.Users;
+import tfisher.session.UsersModelInterface;
+import tfisher.session.UsersModelHibernateImpl;
 
 /**
  *
