@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 4, 2014 12:06:29 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class name="tfisher.entities.Url" schema="public" table="url">
+    <id name="id" type="long">
+      <column name="id"/>
+      <generator class="assigned"/>
+    </id>
+    <many-to-one class="tfisher.entities.Tweet" fetch="select" name="tweet">
+      <column name="tweet_id"/>
+    </many-to-one>
+    <property name="displayUrl" type="string">
+      <column name="display_url"/>
+    </property>
+    <property name="expandedUrl" type="string">
+      <column name="expanded_url"/>
+    </property>
+    <property name="indices" type="string">
+      <column name="indices"/>
+    </property>
+    <property name="url" type="string">
+      <column name="url"/>
+    </property>
+  </class>
+</hibernate-mapping>

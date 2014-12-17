@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 4, 2014 12:06:29 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class name="tfisher.entities.Tweet" schema="public" table="tweet">
+    <id name="idStr" type="string">
+      <column name="id_str"/>
+      <generator class="assigned"/>
+    </id>
+    <many-to-one class="tfisher.entities.Users" fetch="select" name="users">
+      <column name="user_id"/>
+    </many-to-one>
+    <many-to-one class="tfisher.entities.Places" fetch="select" name="places">
+      <column name="place_id"/>
+    </many-to-one>
+    <property name="createdAt" type="string">
+      <column name="created_at"/>
+    </property>
+    <property name="text" type="string">
+      <column name="text"/>
+    </property>
+    <property name="source" type="string">
+      <column name="source"/>
+    </property>
+    <property name="truncated" type="java.lang.Boolean">
+      <column name="truncated"/>
+    </property>
+    <property name="NInReplyToStatusIdStr" type="string">
+      <column name="n_in_reply_to_status_id_str"/>
+    </property>
+    <property name="NInReplyToUserIdStr" type="string">
+      <column name="n_in_reply_to_user_id_str">
+        <comment>nullable</comment>
+      </column>
+    </property>
+    <property name="NInReplyToScreenName" type="string">
+      <column name="n_in_reply_to_screen_name"/>
+    </property>
+    <property name="NCoordinates" type="serializable">
+      <column name="n_coordinates">
+        <comment>geography postgis type of POINT (no lose of geometry type)</comment>
+      </column>
+    </property>
+    <property name="retweetCount" type="java.lang.Integer">
+      <column name="retweet_count"/>
+    </property>
+    <property name="NFavoriteCount" type="java.lang.Integer">
+      <column name="n_favorite_count">
+        <comment>nullable</comment>
+      </column>
+    </property>
+    <property name="NFavorited" type="java.lang.Boolean">
+      <column name="n_favorited">
+        <comment>nullable</comment>
+      </column>
+    </property>
+    <property name="filterLevel" type="string">
+      <column length="400" name="filter_level">
+        <comment>Setting this parameter to one of none, low, or medium will set the minimum value of the filter_level Tweet attribute required to be included in the
+                stream. The default value is none, which includes all available Tweets.</comment>
+      </column>
+    </property>
+    <property name="NLang" type="string">
+      <column name="n_lang">
+        <comment>example: en, or "und" if no language detected</comment>
+      </column>
+    </property>
+    <property name="PRetweeted" type="java.lang.Boolean">
+      <column name="p_retweeted">
+        <comment>perspectival</comment>
+      </column>
+    </property>
+    <property name="PCurrentUserRetweet" type="string">
+      <column name="p_current_user_retweet">
+        <comment>perspectival. Is an object like below: "current_user_retweet": { "id": 26815871309, "id_str": "26815871309" } i use the "id" instead</comment>
+      </column>
+    </property>
+    <property name="time" type="timestamp">
+      <column length="35" name="time"/>
+    </property>
+    <set fetch="select" inverse="true" lazy="true" name="hashtagses" table="hashtags">
+      <key>
+        <column name="tweet_id"/>
+      </key>
+      <one-to-many class="tfisher.entities.Hashtags"/>
+    </set>
+    <set fetch="select" inverse="true" lazy="true" name="urls" table="url">
+      <key>
+        <column name="tweet_id"/>
+      </key>
+      <one-to-many class="tfisher.entities.Url"/>
+    </set>
+    <set fetch="select" inverse="true" lazy="true" name="medias" table="media">
+      <key>
+        <column name="tweet_id"/>
+      </key>
+      <one-to-many class="tfisher.entities.Media"/>
+    </set>
+  </class>
+</hibernate-mapping>

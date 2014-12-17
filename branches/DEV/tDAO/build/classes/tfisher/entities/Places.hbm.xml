@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 4, 2014 12:06:29 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class name="tfisher.entities.Places" schema="public" table="places">
+    <id name="id" type="string">
+      <column name="id"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="url" type="string">
+      <column name="url">
+        <comment>URL representing the location of additional place metadata for this place.</comment>
+      </column>
+    </property>
+    <property name="placeType" type="string">
+      <column length="150" name="place_type"/>
+    </property>
+    <property name="name" type="string">
+      <column length="150" name="name"/>
+    </property>
+    <property name="fullName" type="string">
+      <column length="150" name="full_name"/>
+    </property>
+    <property name="countryCode" type="string">
+      <column length="4" name="country_code"/>
+    </property>
+    <property name="country" type="string">
+      <column length="150" name="country"/>
+    </property>
+    <property name="PBoundingBox" type="serializable">
+      <column name="p_bounding_box"/>
+    </property>
+    <set fetch="select" inverse="true" lazy="true" name="tweets" table="tweet">
+      <key>
+        <column name="place_id"/>
+      </key>
+      <one-to-many class="tfisher.entities.Tweet"/>
+    </set>
+  </class>
+</hibernate-mapping>
