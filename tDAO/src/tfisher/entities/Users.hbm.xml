@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 4, 2014 12:06:29 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class name="tfisher.entities.Users" schema="public" table="users">
+    <id name="id" type="string">
+      <column name="id"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="name" type="string">
+      <column length="30" name="name"/>
+    </property>
+    <property name="screenName" type="string">
+      <column length="30" name="screen_name"/>
+    </property>
+    <property name="NLocation" type="string">
+      <column length="30" name="n_location"/>
+    </property>
+    <property name="NUrl" type="string">
+      <column name="n_url">
+        <comment>A URL provided by the user in association with their profile. Example: "url":"http:\/\/dev.twitter.com"</comment>
+      </column>
+    </property>
+    <property name="NDescription" type="string">
+      <column name="n_description"/>
+    </property>
+    <property name="protected_" type="java.lang.Boolean">
+      <column name="protected"/>
+    </property>
+    <property name="followersCount" type="java.lang.Integer">
+      <column name="followers_count"/>
+    </property>
+    <property name="friendsCount" type="java.lang.Integer">
+      <column name="friends_count"/>
+    </property>
+    <property name="listedCount" type="java.lang.Integer">
+      <column name="listed_count"/>
+    </property>
+    <property name="createdAt" type="string">
+      <column name="created_at">
+        <comment>UTC</comment>
+      </column>
+    </property>
+    <property name="favouritesCount" type="java.lang.Integer">
+      <column name="favourites_count"/>
+    </property>
+    <property name="NUtcOffset" type="java.lang.Integer">
+      <column name="n_utc_offset">
+        <comment>The offset from GMT/UTC in seconds. Example: "utc_offset": -18000</comment>
+      </column>
+    </property>
+    <property name="geoEnabled" type="java.lang.Boolean">
+      <column name="geo_enabled"/>
+    </property>
+    <property name="verified" type="java.lang.Boolean">
+      <column name="verified"/>
+    </property>
+    <property name="statusesCount" type="java.lang.Integer">
+      <column name="statuses_count">
+        <comment>The number of tweets (including retweets) issued by the user.</comment>
+      </column>
+    </property>
+    <property name="lang" type="string">
+      <column length="15" name="lang"/>
+    </property>
+    <property name="contributorsEnabled" type="java.lang.Boolean">
+      <column name="contributors_enabled"/>
+    </property>
+    <property name="isTranslator" type="java.lang.Boolean">
+      <column name="is_translator"/>
+    </property>
+    <property name="profileBackgroundColor" type="string">
+      <column length="15" name="profile_background_color">
+        <comment>The hexadecimal color chosen by the user for their background.</comment>
+      </column>
+    </property>
+    <property name="profileBackgroundImageUrl" type="string">
+      <column name="profile_background_image_url"/>
+    </property>
+    <property name="profileBackgroundImageUrlHttps" type="string">
+      <column name="profile_background_image_url_https"/>
+    </property>
+    <property name="profileBackgroundTile" type="java.lang.Boolean">
+      <column name="profile_background_tile"/>
+    </property>
+    <property name="profileImageUrl" type="string">
+      <column name="profile_image_url"/>
+    </property>
+    <property name="profileImageUrlHttps" type="string">
+      <column name="profile_image_url_https"/>
+    </property>
+    <property name="profileBannerUrl" type="string">
+      <column name="profile_banner_url"/>
+    </property>
+    <property name="profileLinkColor" type="string">
+      <column length="15" name="profile_link_color"/>
+    </property>
+    <property name="profileSidebarBorderColor" type="string">
+      <column length="15" name="profile_sidebar_border_color"/>
+    </property>
+    <property name="profileSidebarFillColor" type="string">
+      <column length="15" name="profile_sidebar_fill_color"/>
+    </property>
+    <property name="profileTextColor" type="string">
+      <column length="15" name="profile_text_color"/>
+    </property>
+    <property name="profileUseBackgroundImage" type="java.lang.Boolean">
+      <column name="profile_use_background_image"/>
+    </property>
+    <property name="defaultProfile" type="java.lang.Boolean">
+      <column name="default_profile"/>
+    </property>
+    <property name="defaultProfileImage" type="java.lang.Boolean">
+      <column name="default_profile_image"/>
+    </property>
+    <property name="NFollowRequestSent" type="java.lang.Boolean">
+      <column name="n_follow_request_sent"/>
+    </property>
+    <property name="NNotifications" type="string">
+      <column length="15" name="n_notifications"/>
+    </property>
+    <property name="NTimeZone" type="string">
+      <column name="n_time_zone"/>
+    </property>
+    <set fetch="select" inverse="true" lazy="true" name="tweets" table="tweet">
+      <key>
+        <column name="user_id"/>
+      </key>
+      <one-to-many class="tfisher.entities.Tweet"/>
+    </set>
+  </class>
+</hibernate-mapping>
