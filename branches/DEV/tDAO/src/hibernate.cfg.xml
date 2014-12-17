@@ -8,11 +8,11 @@
     <property name="hibernate.connection.username">postgres</property>
     <property name="hibernate.connection.password">root</property>
     <property name="current_session_context_class">thread</property>
-    <mapping resource="tdao/entities/Users.hbm.xml"/>
-    <mapping resource="tdao/entities/Media.hbm.xml"/>
-    <mapping resource="tdao/entities/Tweet.hbm.xml"/>
-    <mapping resource="tdao/entities/Hashtags.hbm.xml"/>
-    <mapping resource="tdao/entities/Url.hbm.xml"/>
-    <mapping resource="tdao/entities/Places.hbm.xml"/>
+    <mapping resource="tfisher/entities/Users.hbm.xml"/>
+    <mapping resource="tfisher/entities/Media.hbm.xml"/>
+    <mapping resource="tfisher/entities/Tweet.hbm.xml"/>
+    <mapping resource="tfisher/entities/Hashtags.hbm.xml"/>
+    <mapping resource="tfisher/entities/Url.hbm.xml"/>
+    <mapping resource="tfisher/entities/Places.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

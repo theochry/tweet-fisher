@@ -10,7 +10,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Observable;
 
-import tdao.entities.Tweet;
+import tfisher.entities.Tweet;
 import twitter4j.User;
 
 /**
