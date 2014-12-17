@@ -9,13 +9,14 @@ package tfisher.dao;
 import java.util.ArrayList;
 import java.util.Observable;
 import org.springframework.stereotype.Component;
+import tfisher.interfaces.IKeywords;
 
 /**
  * This class keeps the user's keywords
  * @author Theodoros Chrysochoidis
  */
 @Component
-public class Keywords extends Observable{
+public class Keywords extends Observable implements IKeywords{
     
     private final ArrayList< String > _keywords = new ArrayList< String >();
     private int  _occurences;

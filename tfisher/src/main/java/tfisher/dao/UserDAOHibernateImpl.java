@@ -18,12 +18,14 @@ import org.hibernate.Query;
 import org.springframework.stereotype.Component;
  
 @Component
-public class UserDAOHibernateImpl extends HibernateDAO<User, BigDecimal> implements UserDAO {
-    public User findByName(String name) {
+public class UserDAOHibernateImpl extends HibernateDAO<User, BigDecimal> implements UserDAO 
+{
+    public User findByName(String name) 
+    {
         User user = null;
         String sql = "SELECT p FROM User p WHERE p.name = :name";
         Query query = HibernateUtil.getSession().createQuery(sql).setParameter("name", name);
-        user = findOne(query);
+        user = findOne(query);        
         return user;
     }
    

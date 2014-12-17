@@ -23,7 +23,11 @@ import tfisher.auth.TwitterAuth;
 import tfisher.controllers.DownloadController;
 import tfisher.controllers.KeywordsController;
 import tfisher.controllers.LoginController;
+import tfisher.controllers.StoreTweetController;
+import tfisher.controllers.StoreUserController;
 import tfisher.dao.Keywords;
+import tfisher.entities.Tweet;
+import tfisher.entities.User;
 import twitter4j.TwitterException;
 
 
@@ -44,12 +48,15 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     //models
     public static TweetDTO _tweetDTO;  
     public  static Keywords _keywordsModel;
-   
+    public static User user;
+    public static Tweet tweet;
     
     //controllers
     public static DownloadController _downloadController;  
     public static LoginController _loginController;
     public static KeywordsController _keywordsController;
+    public static StoreUserController _storeUserController;
+    public static StoreTweetController _storeTweetController;
     
     //others
      DefaultTableModel _model;     
@@ -396,10 +403,17 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      _downloadController = (DownloadController)context.getBean("downloadController"); 
      _keywordsController = (KeywordsController)context.getBean("keywordsController"); 
      _loginFormView = (Login)context.getBean("login"); 
-      
+     user = (User)context.getBean("user"); 
+     tweet = (Tweet)context.getBean("tweet"); 
+     _storeUserController = (StoreUserController)context.getBean("storeUserController"); 
+     _storeTweetController = (StoreTweetController)context.getBean("storeTweetController"); 
+     
+     user.addObserver(_storeUserController);
+     tweet.addObserver(_storeTweetController);
+     
      _keywordsController.setDependencies(_keywordsModel, _keywordsFormView);
      _loginController.setDependencies(_twitterAuth, _loginFormView);   
-     _downloadController.setDependencies(_keywordsModel, _tweetDTO, _twitterAuth);       
+     _downloadController.setDependencies(_keywordsModel, _tweetDTO, _twitterAuth, user, tweet);       
         
      _loginFormView.addController(_loginController );         
      _keywordsFormView.addController( _keywordsController );  

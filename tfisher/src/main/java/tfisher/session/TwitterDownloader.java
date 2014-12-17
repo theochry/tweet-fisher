@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.springframework.stereotype.Component;
-import tfisher.interfaces.ITwitterDownloaderService;
+import tfisher.interfaces.ITwitterDownloader;
 import tfisher.dao.Keywords;
+import tfisher.entities.Tweet;
 import twitter4j.*;
 import twitter4j.Status;
+import tfisher.entities.User;
 
 
 
@@ -25,7 +27,7 @@ import twitter4j.Status;
  * 
  */
 @Component
-public class TwitterDownloader implements Runnable, ITwitterDownloaderService
+public class TwitterDownloader implements Runnable, ITwitterDownloader
 {       
     private final Object lock = new Object(); 
     private final HashMap<String, Integer> counterKeywords = new HashMap<String, Integer>();
@@ -34,18 +36,23 @@ public class TwitterDownloader implements Runnable, ITwitterDownloaderService
     private long timeWindow; 
     private  TweetDTO statuses;
     private final FilterQuery filterQuery = new FilterQuery();
+    private UserModelHibernateImpl userManager = new UserModelHibernateImpl();
+    private TweetModelHibernateImpl tweetManager = new TweetModelHibernateImpl();
+   
     
-    
-    //
+    //For run()    
     private  TweetDTO _tweetDTO;
     private TwitterStream _twitterStream;
     private  int _miliseconds;
     private  Keywords _keywords;
+    private User _user;
+    private Tweet _tweet;
   
     public TwitterDownloader(){}
-    public TwitterDownloader( final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords )
+    public TwitterDownloader( final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords, User user, Tweet tweet )
     {
-        _tweetDTO = tweetDTO; _twitterStream = twitterStream; _miliseconds = miliseconds; _keywords = keywords;
+        _tweetDTO = tweetDTO; _twitterStream = twitterStream; _miliseconds = miliseconds; _keywords = keywords; _user = user;
+        _tweet = tweet;
     }
     
     /**
@@ -58,7 +65,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloaderService
      *      Time window (int)
      * @return TweetDTO with downloaded tweets
      */   
-    public TweetDTO download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords ) 
+    public TweetDTO download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords,final User user, final Tweet tweet ) 
     {      
         initHashMapOfKeywords (keywords);
         startTime = System.currentTimeMillis();          
@@ -73,11 +80,19 @@ public class TwitterDownloader implements Runnable, ITwitterDownloaderService
                 ArrayList<String> reachedKeywords = new ArrayList<String>();                  
                 //for testing purpose
                 //System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() + "Created at: "+status.getCreatedAt() );
-                System.out.println( "Created at: "+status.getCreatedAt()+" Tweet Text: " + status.getText()  );              
+                System.out.println( "USER ID: " +status.getUser().getId()); 
+                System.out.println( "USER ID: " +String.valueOf(status.getUser().getId())); 
+                
                 String containedKeyword = tweetContainsKeyword( keywords,status.getText() );             
                
                 //Αρχικά μπαίνουν όλα τα statuses, μετά ελέγχεται ποια από αυτά έχουν τα ανάλογα occurences και όσα δεν έχουν, διαγράφονται
                 //και παραμένουν μόνο αυτά που έχουν
+                storeUser(status,user);
+                storeTweet(status,tweet,user);
+                
+              
+               //userManager.saveNewUser(user);
+               
                 statuses  = new TweetDTO();
                 statuses.setTweetText( status.getText() );
                 statuses.setCreator( status.getUser().getName() );
@@ -231,9 +246,35 @@ public class TwitterDownloader implements Runnable, ITwitterDownloaderService
         return keywordsObject.getKeywords().toArray( keywordsArray );
     }       
 
+    public void storeUser ( Status status, User user )
+    {
+        user.setCreatedAt(status.getUser().getCreatedAt().toString());
+        user.setFollowersCount(status.getUser().getFollowersCount());
+        user.setFriendsCount(status.getUser().getFriendsCount());
+        user.setIdStr(String.valueOf(status.getUser().getId()));
+        user.setLang(status.getUser().getLang());
+        user.setNTimeZone(status.getUser().getTimeZone());
+        user.setNUtcOffset(1);              
+        user.setName(status.getUser().getName());              
+        user.setScreenName(status.getUser().getScreenName());
+        user.setStatusesCount(status.getUser().getStatusesCount()); user.setNTimeZone(status.getUser().getTimeZone());              
+        user.changeState();              
+    }
+    
+    public void storeTweet(Status status, Tweet tweet, User user)
+    {
+        tweet.setCreatedAt(String.valueOf(status.getCreatedAt()));
+        tweet.setIdStr(String.valueOf(status.getId()));
+        tweet.setNLang(status.getLang());
+        tweet.setRetweetCount(status.getRetweetCount());
+        tweet.setSource(status.getSource());
+        tweet.setText(status.getText());
+        tweet.setUser(user);
+        tweet.changeState();
+    }
     @Override
     public void run() {
-        download(  _tweetDTO,_twitterStream,_miliseconds, _keywords);
+        download(  _tweetDTO,_twitterStream,_miliseconds, _keywords, _user, _tweet);
     }
   
 }//end of TwitterDownload
