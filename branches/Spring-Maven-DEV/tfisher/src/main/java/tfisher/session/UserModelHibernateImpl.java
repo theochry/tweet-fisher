@@ -51,7 +51,7 @@ public class UserModelHibernateImpl implements UserModelInterface {
             allPersons = UserDAO.findAll(User.class);
             HibernateUtil.commitTransaction();
         } catch (HibernateException ex) {
-            System.out.println("Handle your error here");
+            System.out.println("Can't load all users");
         }
         return allPersons;
     }
@@ -63,6 +63,8 @@ public class UserModelHibernateImpl implements UserModelInterface {
             HibernateUtil.commitTransaction();
         } catch (HibernateException ex) {
             System.out.println("saveNewPersonException");
+            ex.printStackTrace();
+            ex.getMessage();
             HibernateUtil.rollbackTransaction();
         }
     }
@@ -75,7 +77,7 @@ public class UserModelHibernateImpl implements UserModelInterface {
             user = (User) UserDAO.findByID(User.class, id);
             HibernateUtil.commitTransaction();
         } catch (HibernateException ex) {
-            System.out.println("Handle your error here");
+            System.out.println("Cant't find user with id "+id);
         }
         return user;
     }

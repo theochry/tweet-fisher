@@ -8,12 +8,16 @@ package tfisher.interfaces;
 
 import DTO.TweetDTO;
 import tfisher.dao.Keywords;
+import tfisher.entities.Tweet;
+import tfisher.entities.User;
 import twitter4j.TwitterStream;
 
 /**
  *
- * @author Theodore Chrysochoidis
+ * @author Theodore Crysochoidis
  */
-public interface TwitterConsumer {
-    void processDownload(final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords);
+public interface ITwitterDownloader 
+{    
+    TweetDTO download (final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords, User user, Tweet tweet );
+    
 }

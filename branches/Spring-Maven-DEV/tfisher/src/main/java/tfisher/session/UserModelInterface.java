@@ -21,7 +21,7 @@ public interface UserModelInterface {
     public User findByUserName(String name);
  
     public List<User> loadAllUsers();
- 
+
     public void saveNewUser(User user);
  
     public User findUserById(BigDecimal id);
