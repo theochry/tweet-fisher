@@ -7,6 +7,7 @@
 package tfisher.session;
 
 import DTO.TweetDTO;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,8 +30,7 @@ import tfisher.entities.User;
 @Component
 public class TwitterDownloader implements Runnable, ITwitterDownloader
 {       
-    private final Object lock = new Object(); 
-    private final HashMap<String, Integer> counterKeywords = new HashMap<String, Integer>();
+    private final Object lock = new Object();     
     private long startTime;        
     private long endTime;
     private long timeWindow; 
@@ -38,6 +38,9 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     private final FilterQuery filterQuery = new FilterQuery();
     private UserModelHibernateImpl userManager = new UserModelHibernateImpl();
     private TweetModelHibernateImpl tweetManager = new TweetModelHibernateImpl();
+    
+    private Multimap<String, Status> _keywordStatusMap = HashMultimap.create();
+    private final HashMap<String, Integer> counterKeywords = new HashMap<String, Integer>();
    
     
     //For run()    
@@ -68,7 +71,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
      * @param tweet
      * @return TweetDTO with downloaded tweets
      */   
-    public TweetDTO download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords,final User user, final Tweet tweet ) 
+    public boolean download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords,final User user, final Tweet tweet ) 
     {      
         initHashMapOfKeywords (keywords);
         startTime = System.currentTimeMillis();          
@@ -90,11 +93,9 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                 //Αρχικά μπαίνουν όλα τα statuses, μετά ελέγχεται ποια από αυτά έχουν τα ανάλογα occurences και όσα δεν έχουν, διαγράφονται
                 //και παραμένουν μόνο αυτά που έχουν
                 storeUser(status,user);
-                storeTweet(status,tweet,user);
-                
+                storeTweet(status,tweet,user);                
               
-               //userManager.saveNewUser(user);
-               
+                            
                 statuses  = new TweetDTO();
                 statuses.setTweetText( status.getText() );
                 statuses.setCreator( status.getUser().getName() );
@@ -163,9 +164,12 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
          twitterStream.shutdown();     
          reachedKeywordsTweetDto ( tweetDTO, keywords.getOccurences() );       
          tweetDTO.notifyAllObservers();        
-         return tweetDTO;
+         return true;
          
     }// end of download 
+    
+   
+    
     
     /**
      * This method get the TweetDTO object and the number of desired occurences
@@ -185,7 +189,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
              tweetDtoIterator.removeAll(key);
           }         
         }
-    }//end of reloadTweetDto
+    }//end of reachedKeywordsTweetDto
     
     /**
      * This method search for given keywords inside a twitter status
