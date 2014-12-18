@@ -63,6 +63,9 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
      *      The stream of public tweets (TwitterStream)
      * @param miliseconds
      *      Time window (int)
+     * @param keywords
+     * @param user
+     * @param tweet
      * @return TweetDTO with downloaded tweets
      */   
     public TweetDTO download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords,final User user, final Tweet tweet ) 
@@ -80,8 +83,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                 ArrayList<String> reachedKeywords = new ArrayList<String>();                  
                 //for testing purpose
                 //System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() + "Created at: "+status.getCreatedAt() );
-                System.out.println( "USER ID: " +status.getUser().getId()); 
-                System.out.println( "USER ID: " +String.valueOf(status.getUser().getId())); 
+               
                 
                 String containedKeyword = tweetContainsKeyword( keywords,status.getText() );             
                
