@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 13 ??? 2014 8:05:24 ?? by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class name="tfisher.entities.Tweet" schema="public" table="tweet">
+    <id name="idStr" type="string">
+      <column length="50" name="id_str"/>
+      <generator class="assigned"/>
+    </id>
+    <many-to-one class="tfisher.entities.User" fetch="select" name="user">
+      <column length="50" name="user_id"/>
+    </many-to-one>
+    <property name="createdAt" type="string">
+      <column length="50" name="created_at"/>
+    </property>
+    <property name="text" type="string">
+      <column length="200" name="text"/>
+    </property>
+    <property name="source" type="string">
+      <column length="100" name="source"/>
+    </property>
+    <property name="retweetCount" type="java.lang.Integer">
+      <column name="retweet_count"/>
+    </property>
+    <property name="NLang" type="string">
+      <column length="15" name="n_lang"/>
+    </property>
+    <set fetch="select" inverse="true" lazy="true" name="medias" table="media">
+      <key>
+        <column length="50" name="tweet_id_str"/>
+      </key>
+      <one-to-many class="tfisher.entities.Media"/>
+    </set>
+  </class>
+</hibernate-mapping>

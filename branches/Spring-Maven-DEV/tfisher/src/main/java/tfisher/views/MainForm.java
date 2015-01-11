@@ -8,6 +8,9 @@ package tfisher.views;
 
 import DTO.TweetDTO;
 import com.google.common.collect.Multimap;
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Observable;
@@ -23,6 +26,8 @@ import tfisher.auth.TwitterAuth;
 import tfisher.controllers.DownloadController;
 import tfisher.controllers.KeywordsController;
 import tfisher.controllers.LoginController;
+import tfisher.controllers.Notifier;
+import tfisher.controllers.ResultsController;
 import tfisher.controllers.StoreTweetController;
 import tfisher.controllers.StoreUserController;
 import tfisher.dao.Keywords;
@@ -43,6 +48,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public static KeywordsForm _keywordsFormView;    
     public static Settings _settingsFormView;    
     public static Login _loginFormView;
+    public static ResultsForm _resultsFormView;
     
     
     //models
@@ -57,9 +63,11 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public static KeywordsController _keywordsController;
     public static StoreUserController _storeUserController;
     public static StoreTweetController _storeTweetController;
+    public static ResultsController _resultsController;
+    public static Notifier _notifier;
     
     //others
-     DefaultTableModel _model;     
+   
      public static TwitterAuth _twitterAuth;
      
     
@@ -67,13 +75,23 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         this._keywordsModel = keywords;
     }
     
-    
+     private void centerFrame() 
+    {
+        Dimension windowSize = getSize();
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        Point centerPoint = ge.getCenterPoint();
+        int dx = centerPoint.x - windowSize.width / 2;
+        int dy = centerPoint.y - windowSize.height / 2;    
+        setLocation(dx, dy);
+        setResizable(false);
+    }
     
     public MainForm() 
     {
         initComponents();       
         createControls();
-        _model = (DefaultTableModel) resultsTable.getModel();        
+        centerFrame();
+        
         ButtonGroup buttonGroup = new ButtonGroup();        
         buttonGroup.add(orRB);
         buttonGroup.add(andRB);
@@ -86,6 +104,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         settingsJmenu.addActionListener( new MenuSettingsListener());
         startBtn.addActionListener ( new DownloadListener() );     
         loginJmenu.addActionListener( new MenuLoginListener() );
+        resultsJmenu.addActionListener(new ResultsListener());
    }
    
     public Keywords getKeywords()
@@ -103,6 +122,10 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         return _settingsFormView;
     } 
     
+    public ResultsForm getResultsFormView()
+    {
+        return _resultsFormView;
+    } 
     public Login getLoginFormView()
     {
         return _loginFormView;
@@ -139,10 +162,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         secondsSpinner = new javax.swing.JSpinner();
         jLabel2 = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
-        resultsPanel = new java.awt.Panel();
-        jLabel3 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        resultsTable = new javax.swing.JTable();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         loginJmenu = new javax.swing.JMenuItem();
@@ -240,43 +259,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        jLabel3.setText("Results");
-
-        resultsTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Author", "Text"
-            }
-        ));
-        jScrollPane1.setViewportView(resultsTable);
-
-        javax.swing.GroupLayout resultsPanelLayout = new javax.swing.GroupLayout(resultsPanel);
-        resultsPanel.setLayout(resultsPanelLayout);
-        resultsPanelLayout.setHorizontalGroup(
-            resultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(resultsPanelLayout.createSequentialGroup()
-                .addGroup(resultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(resultsPanelLayout.createSequentialGroup()
-                        .addGap(270, 270, 270)
-                        .addComponent(jLabel3))
-                    .addGroup(resultsPanelLayout.createSequentialGroup()
-                        .addGap(42, 42, 42)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 902, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        resultsPanelLayout.setVerticalGroup(
-            resultsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(resultsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 374, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         jMenu1.setText("File");
 
         loginJmenu.setText("Login");
@@ -315,7 +297,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
 
         jMenu3.setText("Results");
 
-        resultsJmenu.setText("Show results");
+        resultsJmenu.setText("Results Form");
         jMenu3.add(resultsJmenu);
 
         jMenuBar1.add(jMenu3);
@@ -327,31 +309,28 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(64, 64, 64)
+                        .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(112, 112, 112)
                         .addComponent(startBtn))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(resultsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(62, Short.MAX_VALUE))
+                        .addGap(22, 22, 22)
+                        .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(53, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(59, 59, 59)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(startBtn))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(resultsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(64, Short.MAX_VALUE)
+                .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(startBtn)
+                .addGap(19, 19, 19)
+                .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
@@ -396,7 +375,9 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         //Initialize beans
       _keywordsModel = (Keywords)context.getBean("keywords");
       _tweetDTO = (TweetDTO)context.getBean("tweetDTO");
-      _keywordsFormView = (KeywordsForm)context.getBean("keywordsForm");
+      _keywordsFormView = (KeywordsForm)context.getBean("keywordsForm");     
+      _resultsFormView = (ResultsForm)context.getBean("resultsForm");
+      
       _twitterAuth = (TwitterAuth)context.getBean("twitterAuth");
       _settingsFormView = (Settings)context.getBean("settings");  
      _loginController = (LoginController)context.getBean("loginController"); 
@@ -407,18 +388,25 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      tweet = (Tweet)context.getBean("tweet"); 
      _storeUserController = (StoreUserController)context.getBean("storeUserController"); 
      _storeTweetController = (StoreTweetController)context.getBean("storeTweetController"); 
+     _resultsController = (ResultsController)context.getBean("resultsController"); 
+     _notifier = (Notifier)context.getBean("notifier"); 
      
      user.addObserver(_storeUserController);
      tweet.addObserver(_storeTweetController);
+     tweet.addObserver(_notifier);
      
      _keywordsController.setDependencies(_keywordsModel, _keywordsFormView);
      _loginController.setDependencies(_twitterAuth, _loginFormView);   
      _downloadController.setDependencies(_keywordsModel, _tweetDTO, _twitterAuth, user, tweet);       
-        
+     _resultsController.setDependencies(tweet, _resultsFormView);
+    
+     
      _loginFormView.addController(_loginController );         
      _keywordsFormView.addController( _keywordsController );  
      _settingsFormView.addController( _keywordsController );  
-     _keywordsModel.addObserver( _mainForm );         
+     _resultsFormView.addController(_resultsController);
+     _keywordsModel.addObserver( _mainForm );   
+     
      _tweetDTO.addObserver( _mainForm );        
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {              
@@ -433,14 +421,12 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem5;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private java.awt.List keywordsList;
@@ -448,8 +434,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JMenuItem loginJmenu;
     private javax.swing.JRadioButton orRB;
     private javax.swing.JMenuItem resultsJmenu;
-    private java.awt.Panel resultsPanel;
-    private javax.swing.JTable resultsTable;
     private javax.swing.JMenu searchJmenu;
     private javax.swing.JMenuItem searchKeywordsJmenu;
     private javax.swing.JSpinner secondsSpinner;
@@ -472,35 +456,11 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         }
         if ( obs instanceof TweetDTO)
         {                  
-           showResults();
+          
         }
         
     }
-     public void showResults()
-    {
-        Multimap<String, TweetDTO> tempDTO =  _tweetDTO.getTweetDtoMultiHash();       
-        _model.setRowCount(0);
-         if ( !tempDTO.isEmpty() )
-        {             
-            for(TweetDTO value : tempDTO.values()) 
-            {               
-                _model.insertRow(_model.getRowCount(), new Object[]{ value.getCreator(), value.getTweetText()}); 
-                
-            }           
-        }
-         
-           
-        else
-        {
-           JOptionPane.showMessageDialog(null,"No results to show","No results",JOptionPane.WARNING_MESSAGE);
-        }
-          for(String value : tempDTO.keys()) 
-        {
-            System.out.println("MAIN KEYS"+value);
-            
-        } 
-       
-    }
+   
    
     //http://stackoverflow.com/questions/19407038/java-actionlistener-actionperformed-in-different-class
     
@@ -513,7 +473,15 @@ class MenuKeywordListener implements ActionListener {
     }   
 }
 
-
+class ResultsListener implements ActionListener {
+    
+  public void actionPerformed(ActionEvent e) 
+   {       
+        MainForm mf = MainForm.getSingletonInstance();
+        mf.getResultsFormView().setVisible(true);   
+         _resultsFormView.populateComboKeywords(_keywordsModel);
+    }   
+}
 
 class DownloadListener implements ActionListener {
    
@@ -541,6 +509,7 @@ class DownloadListener implements ActionListener {
         {            
             try { 
                 _downloadController.startDownload( mf.getSeconds() * 1000, AndOperator( keywords ) );
+                
             } catch (TwitterException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }

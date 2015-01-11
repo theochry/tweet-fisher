@@ -39,6 +39,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     private UserModelHibernateImpl userManager = new UserModelHibernateImpl();
     private TweetModelHibernateImpl tweetManager = new TweetModelHibernateImpl();
     
+    //περιέχει ολόκληρο το status για το συγκεκριμένο keyword, ένα keyword μπορεί να υπάρχει πολλές φορές με διαφορετικό status
     private Multimap<String, Status> _keywordStatusMap = HashMultimap.create();
     private final HashMap<String, Integer> counterKeywords = new HashMap<String, Integer>();
    
@@ -76,7 +77,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         initHashMapOfKeywords (keywords);
         startTime = System.currentTimeMillis();          
         endTime = startTime + miliseconds;
-        timeWindow =  startTime + keywords.getTimeInterval();       
+        timeWindow = startTime + keywords.getTimeInterval();       
            
         StatusListener listener = new StatusListener() 
         {
@@ -88,23 +89,20 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                 //System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() + "Created at: "+status.getCreatedAt() );
                
                 
-                String containedKeyword = tweetContainsKeyword( keywords,status.getText() );             
-               
-                //Αρχικά μπαίνουν όλα τα statuses, μετά ελέγχεται ποια από αυτά έχουν τα ανάλογα occurences και όσα δεν έχουν, διαγράφονται
-                //και παραμένουν μόνο αυτά που έχουν
-                storeUser(status,user);
-                storeTweet(status,tweet,user);                
-              
-                            
-                statuses  = new TweetDTO();
-                statuses.setTweetText( status.getText() );
-                statuses.setCreator( status.getUser().getName() );
-                if ( containedKeyword!= "" )
-                    tweetDTO.getTweetDtoMultiHash().put(containedKeyword, statuses);               
-                
+                String containedKeyword = tweetContainsKeyword( keywords,status.getText() );    
+                _keywordStatusMap.put(containedKeyword, status);       
                   
                 if ( System.currentTimeMillis() > timeWindow )
-                {                                
+                {     
+                    for ( int i = 0; i < keywords.getKeywords().size(); i++ )
+                    {
+                        String check = checkOccurences(keywords.getOccurences());
+                        if ( null != check )
+                        {
+                            storeStatuses(check, user, tweet);
+                            
+                        }
+                    }                   
                      timeWindow = System.currentTimeMillis() + keywords.getTimeInterval();                    
                 }
                 //for testing purpose
@@ -162,15 +160,78 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
          }
          System.out.println("returning statuses");
          twitterStream.shutdown();     
-         reachedKeywordsTweetDto ( tweetDTO, keywords.getOccurences() );       
-         tweetDTO.notifyAllObservers();        
+         //reachedKeywordsTweetDto ( tweetDTO, keywords.getOccurences() );       
+         //tweetDTO.notifyAllObservers();        
          return true;
          
     }// end of download 
     
+    
+    public void storeStatuses(String keyword, User user, Tweet tweet)
+    {       
+        for(Status value : _keywordStatusMap.get(keyword)) 
+        {
+            storeUser(value,user);   
+            storeTweet(value,tweet,user);
+        }
+    }
+
+    public void storeUser ( Status status, User user )
+    {
+        user.setCreatedAt(status.getUser().getCreatedAt().toString());
+        user.setFollowersCount(status.getUser().getFollowersCount());
+        user.setFriendsCount(status.getUser().getFriendsCount());
+        user.setIdStr(String.valueOf(status.getUser().getId()));
+        user.setLang(status.getUser().getLang());
+        user.setNTimeZone(status.getUser().getTimeZone());
+        user.setNUtcOffset(1);              
+        user.setName(status.getUser().getName());              
+        user.setScreenName(status.getUser().getScreenName());
+        user.setStatusesCount(status.getUser().getStatusesCount()); user.setNTimeZone(status.getUser().getTimeZone());              
+        user.changeState();              
+    }
+    
+    public void storeTweet(Status status, Tweet tweet, User user)
+    {
+        tweet.setCreatedAt(String.valueOf(status.getCreatedAt()));
+        tweet.setIdStr(String.valueOf(status.getId()));
+        tweet.setNLang(status.getLang());
+        tweet.setRetweetCount(status.getRetweetCount());
+        tweet.setSource(status.getSource());
+        tweet.setText(status.getText());
+        tweet.setUser(user);
+        tweet.changeState();
+    }
+    
+    public String checkOccurences(int occurences)
+    {
+        Iterator<String> counterKeywordsIterator = counterKeywords.keySet().iterator();
+        while( counterKeywordsIterator.hasNext() )
+        {
+          String key = counterKeywordsIterator.next();          
+          if ( counterKeywords.get(key) <= occurences )
+          {        
+             return key;
+          }         
+        }
+        return null;
+    }
+    
    
     
     
+    public void deleteDuplicateStatuses( Multimap<String, Status> keywordStatusMap, HashMap<String, Integer> counterKeywords, int occurences )
+    {
+        Iterator<String> counterKeywordsIterator = counterKeywords.keySet().iterator();
+        while( counterKeywordsIterator.hasNext() )
+        {
+          String key = counterKeywordsIterator.next();          
+          if ( counterKeywords.get(key) < occurences )
+          {        
+             keywordStatusMap.removeAll(key);
+          }         
+        }
+    }
     /**
      * This method get the TweetDTO object and the number of desired occurences
      * for each keyword. Then searches the TweetDTO MultiMap. If a key of the Multimap has less occurences, then the whole key deleted
@@ -250,34 +311,9 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     {       
         String[] keywordsArray = new String[ keywordsObject.getKeywords().size() ];
         return keywordsObject.getKeywords().toArray( keywordsArray );
-    }       
-
-    public void storeUser ( Status status, User user )
-    {
-        user.setCreatedAt(status.getUser().getCreatedAt().toString());
-        user.setFollowersCount(status.getUser().getFollowersCount());
-        user.setFriendsCount(status.getUser().getFriendsCount());
-        user.setIdStr(String.valueOf(status.getUser().getId()));
-        user.setLang(status.getUser().getLang());
-        user.setNTimeZone(status.getUser().getTimeZone());
-        user.setNUtcOffset(1);              
-        user.setName(status.getUser().getName());              
-        user.setScreenName(status.getUser().getScreenName());
-        user.setStatusesCount(status.getUser().getStatusesCount()); user.setNTimeZone(status.getUser().getTimeZone());              
-        user.changeState();              
-    }
+    }    
     
-    public void storeTweet(Status status, Tweet tweet, User user)
-    {
-        tweet.setCreatedAt(String.valueOf(status.getCreatedAt()));
-        tweet.setIdStr(String.valueOf(status.getId()));
-        tweet.setNLang(status.getLang());
-        tweet.setRetweetCount(status.getRetweetCount());
-        tweet.setSource(status.getSource());
-        tweet.setText(status.getText());
-        tweet.setUser(user);
-        tweet.changeState();
-    }
+    
     @Override
     public void run() {
         download(  _tweetDTO,_twitterStream,_miliseconds, _keywords, _user, _tweet);
