@@ -56,12 +56,12 @@ public class Settings extends javax.swing.JFrame  {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel1.setText("Number of occuring events");
 
-        occurencesSpn.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
+        occurencesSpn.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(10), Integer.valueOf(1), null, Integer.valueOf(1)));
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel2.setText("Time window [seconds]");
 
-        timeWindowSpn.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(60), Integer.valueOf(10), null, Integer.valueOf(1)));
+        timeWindowSpn.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(10), Integer.valueOf(10), null, Integer.valueOf(1)));
 
         jLabel3.setText("eg 10 times the keyword \" earth \"");
 
