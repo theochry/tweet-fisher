@@ -20,7 +20,8 @@ import org.springframework.stereotype.Component;
 public class KeywordsController
 { 
     private Keywords _keywords;
-    private KeywordsForm _keywordsForm;   
+    private KeywordsForm _keywordsForm;  
+    private boolean isRunning;
     public KeywordsController(){}
     
     public KeywordsController(Keywords keywords, KeywordsForm keywordsForm) 
@@ -36,12 +37,17 @@ public class KeywordsController
     }
     public boolean setKeyword( String keyword )
     { 
+        
        if ( _keywords.checkKeywordPattern( keyword ) )
        {
             _keywords.setKeyword(keyword);
             return true;
        }
        return false;
+    }
+    public void setIsRunning(boolean running)
+    {
+        isRunning = running;
     }
     
     public ArrayList<String> getKeywords()

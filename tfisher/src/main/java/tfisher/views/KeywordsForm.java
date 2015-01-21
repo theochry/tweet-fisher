@@ -42,7 +42,8 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
       return _keywordToDelete;
   }
   public KeywordsForm() 
-    {        
+    {   
+        super("Keywords");
         initComponents();
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         createControls();

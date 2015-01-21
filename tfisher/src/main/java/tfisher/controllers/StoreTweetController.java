@@ -17,10 +17,9 @@ import tfisher.session.TweetModelHibernateImpl;
  * @author Theodore Chrysochoidis
  */
 @Component
-public class StoreTweetController implements Observer
+public class StoreTweetController extends Observable implements Observer 
 {
     private TweetModelHibernateImpl _tweetManager = new TweetModelHibernateImpl();    
-
     public void update(Observable o, Object arg) 
     {
        Tweet tweet = new Tweet();
@@ -31,8 +30,13 @@ public class StoreTweetController implements Observer
        tweet.setRetweetCount(((Tweet) o).getRetweetCount());
        tweet.setSource(((Tweet) o).getSource());
        tweet.setText(((Tweet) o).getText());
-       tweet.setUser(((Tweet) o).getUser());
-       
-       _tweetManager.saveNewTweet(tweet);
+       tweet.setUser(((Tweet) o).getUser());       
+       _tweetManager.saveNewTweet(tweet);       
+       changeState();       
+    }
+     public void changeState() 
+    {      
+        setChanged();
+        notifyObservers();
     }
 }

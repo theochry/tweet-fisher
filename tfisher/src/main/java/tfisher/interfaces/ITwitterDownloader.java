@@ -18,6 +18,5 @@ import twitter4j.TwitterStream;
  */
 public interface ITwitterDownloader 
 {    
-    boolean download (final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords, User user, Tweet tweet );
-    
+    boolean download (final TweetDTO tweetDTO, TwitterStream twitterStream, final Keywords keywords, User user, Tweet tweet );    
 }

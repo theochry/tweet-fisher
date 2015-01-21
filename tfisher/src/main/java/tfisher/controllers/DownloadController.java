@@ -62,22 +62,15 @@ public class DownloadController
 
     /**
      *
-     * @param miliseconds The given window time (int)
      * @param keywords Keywords to monitor (String[])
      * @return true/false
      */
-    public boolean startDownload( int miliseconds, String[] keywords ) throws TwitterException 
-   {     
-       if ( miliseconds < 1 || 0 == keywords.length )
-       {
-           return false;
-       }
-      
+    public boolean startDownload(  String[] keywords ) throws TwitterException 
+   {      
        _tweetDTO.clearTheTweetDTO();
-      Thread t = new Thread(new TwitterDownloader( _tweetDTO, _twitterAuth.getTwitterStream(), miliseconds, _keywords, _user, _tweet ) );
-      t.start();
-       //_tweetDTO = _idownloader.download( _tweetDTO, _twitterAuth.getTwitterStream(), miliseconds, _keywords); 
-       return true;
+      Thread t = new Thread(new TwitterDownloader( _tweetDTO, _twitterAuth.getTwitterStream(), _keywords, _user, _tweet ) );
+      t.start();   
+      return true;
    }    
 
 }//end of DownloadController

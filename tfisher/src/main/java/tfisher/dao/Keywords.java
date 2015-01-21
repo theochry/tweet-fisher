@@ -119,7 +119,7 @@ public class Keywords extends Observable implements IKeywords{
    {
         if ( timeInterval > 0 )
         {
-            _timeInterval = timeInterval;
+            _timeInterval = timeInterval * 60;
             return true;
         }
         return false;

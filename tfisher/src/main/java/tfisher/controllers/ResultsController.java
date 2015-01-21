@@ -7,8 +7,6 @@
 package tfisher.controllers;
 
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import org.springframework.stereotype.Component;
 import tfisher.entities.Tweet;
 import tfisher.session.TweetModelHibernateImpl;

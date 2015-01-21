@@ -9,7 +9,6 @@ package tfisher.session;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.NonUniqueResultException;
 import org.hibernate.HibernateException;
 import tfisher.dao.HibernateUtil;
 import tfisher.dao.TweetDAO;
@@ -29,11 +28,9 @@ public class TweetModelHibernateImpl implements TweetModelInterface
         try {
             HibernateUtil.beginTransaction();
             tweet = tweetDAO.findByKeyword(keyword);
-            HibernateUtil.commitTransaction();            
-        } catch (NonUniqueResultException ex) {
-            System.out.println("1");
-            System.out.println("Query returned more than one results.");
+            HibernateUtil.commitTransaction();          
         } catch (HibernateException ex) {
+            System.out.println("Cant load all tweets");
            ex.printStackTrace();
         }
         return tweet;

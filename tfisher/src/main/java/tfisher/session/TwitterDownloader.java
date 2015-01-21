@@ -35,27 +35,23 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     private long endTime;
     private long timeWindow; 
     private  TweetDTO statuses;
-    private final FilterQuery filterQuery = new FilterQuery();
-    private UserModelHibernateImpl userManager = new UserModelHibernateImpl();
-    private TweetModelHibernateImpl tweetManager = new TweetModelHibernateImpl();
+    private final FilterQuery filterQuery = new FilterQuery();   
     
     //περιέχει ολόκληρο το status για το συγκεκριμένο keyword, ένα keyword μπορεί να υπάρχει πολλές φορές με διαφορετικό status
     private Multimap<String, Status> _keywordStatusMap = HashMultimap.create();
-    private final HashMap<String, Integer> counterKeywords = new HashMap<String, Integer>();
-   
+    private final HashMap<String, Integer> counterKeywords = new HashMap<String, Integer>();   
     
     //For run()    
     private  TweetDTO _tweetDTO;
-    private TwitterStream _twitterStream;
-    private  int _miliseconds;
+    private TwitterStream _twitterStream;   
     private  Keywords _keywords;
     private User _user;
     private Tweet _tweet;
-  
+   private static final String FILE_PATH = "C:/twitter4j.properties";
     public TwitterDownloader(){}
-    public TwitterDownloader( final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords, User user, Tweet tweet )
+    public TwitterDownloader( final TweetDTO tweetDTO, TwitterStream twitterStream, final Keywords keywords, User user, Tweet tweet )
     {
-        _tweetDTO = tweetDTO; _twitterStream = twitterStream; _miliseconds = miliseconds; _keywords = keywords; _user = user;
+        _tweetDTO = tweetDTO; _twitterStream = twitterStream;  _keywords = keywords; _user = user;
         _tweet = tweet;
     }
     
@@ -65,30 +61,36 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
      *      At the end of the download contains the results (TweetDTO)
      * @param twitterStream
      *      The stream of public tweets (TwitterStream)
-     * @param miliseconds
-     *      Time window (int)
      * @param keywords
      * @param user
      * @param tweet
      * @return TweetDTO with downloaded tweets
      */   
-    public boolean download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords,final User user, final Tweet tweet ) 
-    {      
+    public boolean download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final Keywords keywords,final User user, final Tweet tweet ) 
+    {  
+                
         initHashMapOfKeywords (keywords);
-        startTime = System.currentTimeMillis();          
-        endTime = startTime + miliseconds;
-        timeWindow = startTime + keywords.getTimeInterval();       
-           
+        startTime = System.currentTimeMillis();     
+        timeWindow = startTime + keywords.getTimeInterval();           
         StatusListener listener = new StatusListener() 
         {
             @Override         
             public void onStatus(Status status) 
-            { 
+            {           
+               
+               for( int currentKeyword = 0; currentKeyword < keywords.getKeywords().size(); currentKeyword++ )
+               {
+                   String keyword = keywords.getKeywords().get( currentKeyword );
+                   if ( null == counterKeywords.get(keyword))
+                   {
+                       addNewKeyword(keyword);
+                   }        
+                   System.out.println("Arxiki time tou"+keyword+" kai counterkeywords einai: " +counterKeywords.get(keyword));
+               }
+               
                 ArrayList<String> reachedKeywords = new ArrayList<String>();                  
                 //for testing purpose
-                //System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() + "Created at: "+status.getCreatedAt() );
-               
-                
+                System.out.println("Twitter User: " + status.getUser().getName() + " Tweet Text: " + status.getText() + "Created at: "+status.getCreatedAt() );
                 String containedKeyword = tweetContainsKeyword( keywords,status.getText() );    
                 _keywordStatusMap.put(containedKeyword, status);       
                   
@@ -97,23 +99,14 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                     for ( int i = 0; i < keywords.getKeywords().size(); i++ )
                     {
                         String check = checkOccurences(keywords.getOccurences());
+                        System.out.println("keyword check is: "+check);
                         if ( null != check )
                         {
-                            storeStatuses(check, user, tweet);
-                            
+                            storeStatuses(check, user, tweet);                            
                         }
                     }                   
                      timeWindow = System.currentTimeMillis() + keywords.getTimeInterval();                    
-                }
-                //for testing purpose
-                if( System.currentTimeMillis() > endTime ) 
-                {                      
-                    synchronized (lock) 
-                    {
-                        lock.notify();
-                    }       
-                }  
-                   
+                }                                  
              }
 
             @Override
@@ -139,30 +132,21 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
             @Override
             public void onException(Exception ex) {
                 ex.printStackTrace();
+                if (ex.getMessage().startsWith("420")) 
+                {
+                       System.out.println("Πολλές προσπάθειες σύνδεσης, προσπαθήστε ξανά σε 5'");
+                }
             }       
             
-        };// end of statusListener   
-               
+        };// end of statusListener                  
      
         twitterStream.addListener(listener);            
         String[] lang = { "en" };
         filterQuery.language(lang); 
         String [] criteria = getArrayOfKeywords( keywords );
         filterQuery.track( criteria );   
-        twitterStream.filter(filterQuery);     
-       
-        try {
-           synchronized (lock) {
-             lock.wait();
-           }
-         } catch (InterruptedException e) {
-           e.printStackTrace();
-         }
-         System.out.println("returning statuses");
-         twitterStream.shutdown();     
-         //reachedKeywordsTweetDto ( tweetDTO, keywords.getOccurences() );       
-         //tweetDTO.notifyAllObservers();        
-         return true;
+        twitterStream.filter(filterQuery);          
+        return true;
          
     }// end of download 
     
@@ -174,8 +158,13 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
             storeUser(value,user);   
             storeTweet(value,tweet,user);
         }
+        _keywordStatusMap.removeAll(keyword);
     }
 
+    public void addNewKeyword( String keyword )
+    {
+        counterKeywords.put(keyword, 0); 
+    }
     public void storeUser ( Status status, User user )
     {
         user.setCreatedAt(status.getUser().getCreatedAt().toString());
@@ -209,7 +198,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         while( counterKeywordsIterator.hasNext() )
         {
           String key = counterKeywordsIterator.next();          
-          if ( counterKeywords.get(key) <= occurences )
+          if ( counterKeywords.get(key) >= occurences )
           {        
              return key;
           }         
@@ -258,7 +247,6 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
      *         Keywords to monitor (String[])
      * @param status
      *          The twitter Status (string)
-     * @param keys
      *          
      * @return String [the contained keyword]
      */  
@@ -279,12 +267,14 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                 return "";
          }         
          for ( currentKeyword = 0 ; currentKeyword < keywords.getKeywords().size(); currentKeyword++ )
-         {                                                          
+         {             
+             System.out.println("Keywords Num is: "+keywords.getKeywords().size());
             if ( statusCheck.contains( keywords.getKeywords().get( currentKeyword ).toLowerCase() ) )
             {    
                 //Εάν υπάρχει το keyword στο status, τότε βάλ'το στη λίστα με τα keywords, και αύξησε το μετρητή του keyword
                 keyword = keywords.getKeywords().get( currentKeyword );
-                counterKeywords.put( keyword, counterKeywords.get(keyword) + 1);
+                counterKeywords.put( keyword, counterKeywords.get(keyword) + 1);               
+                System.out.println("TWEET CONTAINS KEYWORD: " +counterKeywords.get(keyword));
             }           
           }
          return keyword;        
@@ -303,7 +293,8 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         String[] keywordsArray = getArrayOfKeywords ( keywords );        
         for ( int kword = 0; kword < keywordsArray.length; kword++ )
         {
-            counterKeywords.put(keywordsArray[kword], 0);
+            counterKeywords.put(keywordsArray[kword], 0); 
+             System.out.println("Keywords init is: " +counterKeywords.get(keywordsArray[kword]));
         }
     }
     
@@ -316,7 +307,9 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     
     @Override
     public void run() {
-        download(  _tweetDTO,_twitterStream,_miliseconds, _keywords, _user, _tweet);
+        download(  _tweetDTO,_twitterStream, _keywords, _user, _tweet);
     }
+
+    
   
 }//end of TwitterDownload

@@ -17,12 +17,13 @@ import tfisher.entities.Tweet;
  */
 public class TweetDAOHibernateImpl extends HibernateDAO<Tweet, BigDecimal> implements TweetDAO
 {
-
+ //https://community.oracle.com/thread/425742
     public List<Tweet> findByKeyword(String keyword) 
     {
         Tweet tweet = null;
-        String sql = "SELECT p FROM Tweet p WHERE p.text like :keyword";         
-        Query query = HibernateUtil.getSession().createQuery(sql).setParameter("keyword", "%"+keyword.toLowerCase()+"%");
+       
+        String sql = "SELECT p FROM Tweet p WHERE UPPER (p.text) LIKE UPPER (:keyword) ";         
+        Query query = HibernateUtil.getSession().createQuery(sql).setParameter("keyword", "%"+keyword+"%");         
         return findMany(query);
         
     }
