@@ -1,10 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 
 package tfisher.views;
+
+
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -22,13 +20,14 @@ import java.util.Properties;
  * @author Yusuke Yamamoto - yusuke at mac.com
  * @since Twitter4J 2.1.7
  */
-public class GetAccessToken implements Runnable{
+public class GetAccessToken {
     /**
      * Usage: java  twitter4j.examples.oauth.GetAccessToken [consumer key] [consumer secret]
      *
      * @param args message
      */
    public static void main(String[] args) {
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         File file = new File("twitter4j.properties");
         Properties prop = new Properties();
         InputStream is = null;
@@ -39,10 +38,13 @@ public class GetAccessToken implements Runnable{
                 prop.load(is);
             }
              
+                prop.setProperty("debug", "true");
                 prop.setProperty("oauth.consumerKey", "VwbqJqEWEGPLI9ZeaeRv8g");
                 prop.setProperty("oauth.consumerSecret", "WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo");
                 os = new FileOutputStream("twitter4j.properties");
                 prop.store(os, "twitter4j.properties");
+              os.close();
+             
             
         } catch (IOException ioe) {
             ioe.printStackTrace();
@@ -69,6 +71,7 @@ public class GetAccessToken implements Runnable{
             System.out.println("Request token secret: " + requestToken.getTokenSecret());
             AccessToken accessToken = null;
 
+            
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             while (null == accessToken) {
                 System.out.println("Open the following URL and grant access to your account:");
@@ -119,7 +122,8 @@ public class GetAccessToken implements Runnable{
                 }
             }
             System.out.println("Successfully stored access token to " + file.getAbsolutePath() + ".");
-            
+            os.close();
+           
             
             
             
@@ -135,9 +139,5 @@ public class GetAccessToken implements Runnable{
         }
     }
 
-    @Override
-    public void run() {
-        String args[] = {"one","two"};
-        main(args);
-    }
+    
 }

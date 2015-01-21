@@ -7,30 +7,36 @@
 package tfisher.views;
 
 import DTO.TweetDTO;
-import com.google.common.collect.Multimap;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import tfisher.auth.TwitterAuth;
 import tfisher.controllers.DownloadController;
 import tfisher.controllers.KeywordsController;
 import tfisher.controllers.LoginController;
-import tfisher.controllers.Notifier;
 import tfisher.controllers.ResultsController;
 import tfisher.controllers.StoreTweetController;
 import tfisher.controllers.StoreUserController;
+import tfisher.controllers.ConnectionChecker;
 import tfisher.dao.Keywords;
+import tfisher.entities.Notification;
 import tfisher.entities.Tweet;
 import tfisher.entities.User;
 import twitter4j.TwitterException;
@@ -64,16 +70,19 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public static StoreUserController _storeUserController;
     public static StoreTweetController _storeTweetController;
     public static ResultsController _resultsController;
-    public static Notifier _notifier;
+    public static Notification _notification;
     
     //others
    
      public static TwitterAuth _twitterAuth;
-     
+     public static ConnectionChecker _ck;
+     public boolean isRunning = false;
     
-       MainForm(Keywords keywords){
-        this._keywordsModel = keywords;
-    }
+       MainForm(Keywords keywords)
+       {
+            super("Tweet-fisher");           
+            this._keywordsModel = keywords;     
+        }
     
      private void centerFrame() 
     {
@@ -86,12 +95,13 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         setResizable(false);
     }
     
+     
     public MainForm() 
     {
         initComponents();       
         createControls();
         centerFrame();
-        
+    
         ButtonGroup buttonGroup = new ButtonGroup();        
         buttonGroup.add(orRB);
         buttonGroup.add(andRB);
@@ -141,10 +151,14 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     }
     
  
-    public int getSeconds()
+   
+    
+    public void disableComponents()
     {
-        return ( Integer ) secondsSpinner.getValue();
-    } 
+         //startBtn.setEnabled(false);
+         //settingsJmenu.setEnabled(false);
+         //searchKeywordsJmenu.setEnabled(false);
+    }
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -158,10 +172,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         orRB = new javax.swing.JRadioButton();
         andRB = new javax.swing.JRadioButton();
         keywordsList = new java.awt.List();
-        windowTimePanel = new java.awt.Panel();
-        secondsSpinner = new javax.swing.JSpinner();
-        jLabel2 = new javax.swing.JLabel();
-        jSeparator2 = new javax.swing.JSeparator();
+        checkAllKeywords = new javax.swing.JCheckBox();
+        jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         loginJmenu = new javax.swing.JMenuItem();
@@ -189,16 +201,17 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
 
         keywordsList.setMultipleMode(true);
 
+        checkAllKeywords.setText("Check all");
+
         javax.swing.GroupLayout keywordsPanelLayout = new javax.swing.GroupLayout(keywordsPanel);
         keywordsPanel.setLayout(keywordsPanelLayout);
         keywordsPanelLayout.setHorizontalGroup(
             keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, keywordsPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(71, 71, 71))
             .addGroup(keywordsPanelLayout.createSequentialGroup()
                 .addGroup(keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(keywordsPanelLayout.createSequentialGroup()
+                        .addGap(64, 64, 64)
+                        .addComponent(jLabel1))
                     .addGroup(keywordsPanelLayout.createSequentialGroup()
                         .addGap(21, 21, 21)
                         .addGroup(keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -209,8 +222,10 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(keywordsPanelLayout.createSequentialGroup()
                         .addGap(39, 39, 39)
-                        .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(checkAllKeywords)))
+                .addContainerGap(101, Short.MAX_VALUE))
         );
         keywordsPanelLayout.setVerticalGroup(
             keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -219,45 +234,25 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
-                .addComponent(orRB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(andRB)
-                .addGap(51, 51, 51))
-        );
-
-        secondsSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(60), Integer.valueOf(1), null, Integer.valueOf(1)));
-
-        jLabel2.setText("Give a window time in seconds [ default is 60 ]:");
-
-        javax.swing.GroupLayout windowTimePanelLayout = new javax.swing.GroupLayout(windowTimePanel);
-        windowTimePanel.setLayout(windowTimePanelLayout);
-        windowTimePanelLayout.setHorizontalGroup(
-            windowTimePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, windowTimePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(windowTimePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(windowTimePanelLayout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(windowTimePanelLayout.createSequentialGroup()
-                        .addComponent(jLabel2)
+                .addGroup(keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(keywordsPanelLayout.createSequentialGroup()
+                        .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                        .addComponent(orRB)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(secondsSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addComponent(andRB)
+                        .addGap(51, 51, 51))
+                    .addGroup(keywordsPanelLayout.createSequentialGroup()
+                        .addComponent(checkAllKeywords)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
-        windowTimePanelLayout.setVerticalGroup(
-            windowTimePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(windowTimePanelLayout.createSequentialGroup()
-                .addGroup(windowTimePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(secondsSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText("File");
 
@@ -309,28 +304,27 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(0, 74, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(64, 64, 64)
-                        .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(112, 112, 112)
-                        .addComponent(startBtn))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(53, Short.MAX_VALUE))
+                        .addGap(50, 50, 50)
+                        .addComponent(startBtn))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addGap(64, 64, 64))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(64, Short.MAX_VALUE)
-                .addComponent(windowTimePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(53, 53, 53)
                 .addComponent(startBtn)
-                .addGap(19, 19, 19)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(1, 1, 1)
+                .addComponent(jButton1)
+                .addContainerGap(81, Short.MAX_VALUE))
         );
 
         pack();
@@ -343,6 +337,11 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private void searchJmenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchJmenuActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_searchJmenuActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+  String[] args = {"VwbqJqEWEGPLI9ZeaeRv8g","WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo"};
+       GetAccessToken.main(args);
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -389,11 +388,12 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      _storeUserController = (StoreUserController)context.getBean("storeUserController"); 
      _storeTweetController = (StoreTweetController)context.getBean("storeTweetController"); 
      _resultsController = (ResultsController)context.getBean("resultsController"); 
-     _notifier = (Notifier)context.getBean("notifier"); 
+     _notification = (Notification)context.getBean("notification"); 
+    
      
      user.addObserver(_storeUserController);
      tweet.addObserver(_storeTweetController);
-     tweet.addObserver(_notifier);
+     _storeTweetController.addObserver(_notification);
      
      _keywordsController.setDependencies(_keywordsModel, _keywordsFormView);
      _loginController.setDependencies(_twitterAuth, _loginFormView);   
@@ -419,8 +419,9 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton andRB;
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JCheckBox checkAllKeywords;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
@@ -428,7 +429,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
     private java.awt.List keywordsList;
     private java.awt.Panel keywordsPanel;
     private javax.swing.JMenuItem loginJmenu;
@@ -436,10 +436,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private javax.swing.JMenuItem resultsJmenu;
     private javax.swing.JMenu searchJmenu;
     private javax.swing.JMenuItem searchKeywordsJmenu;
-    private javax.swing.JSpinner secondsSpinner;
     private javax.swing.JMenuItem settingsJmenu;
     private javax.swing.JButton startBtn;
-    private java.awt.Panel windowTimePanel;
     // End of variables declaration//GEN-END:variables
 
 
@@ -485,6 +483,7 @@ class ResultsListener implements ActionListener {
 
 class DownloadListener implements ActionListener {
    
+              
                 
                
     public void actionPerformed(ActionEvent e) 
@@ -498,21 +497,24 @@ class DownloadListener implements ActionListener {
         }
            
         if ( orRB.isSelected() )
-        {          
-            try {
-                _downloadController.startDownload( mf.getSeconds() * 1000, keywords );
+        {         
+            try {             
+                _downloadController.startDownload(  keywords );            
+                _keywordsController.setIsRunning(true);
             } catch (TwitterException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
+                  
+           
         }
         else if ( andRB.isSelected() )
         {            
-            try { 
-                _downloadController.startDownload( mf.getSeconds() * 1000, AndOperator( keywords ) );
-                
+            try {            
+                _downloadController.startDownload(  keywords );              
             } catch (TwitterException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
+              
         }
             
      } 
@@ -527,7 +529,7 @@ class DownloadListener implements ActionListener {
         keywordsArray[0] = concatKeywords;      
         return keywordsArray;
     }
-}
+    }
 
 class MenuSettingsListener implements ActionListener {
     
@@ -543,12 +545,13 @@ class MenuLoginListener implements ActionListener {
     
   public void actionPerformed(ActionEvent e) 
    {       
-        MainForm mf = MainForm.getSingletonInstance();
+        //MainForm mf = MainForm.getSingletonInstance();
         //mf.getLoginFormView().setVisible(true);   
-        //GetTokens gt = new GetTokens();
-         (new Thread(new GetAccessToken())).start();
-        // gt.storeProperties();
-        //gt.logindo();     
+        
+         //(new Thread(new GetAccessToken())).start();
+         String[] arguments = new String[] {"VwbqJqEWEGPLI9ZeaeRv8g","WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo"};
+      //GetAccessToken.main(arguments);
+          
         //JOptionPane.showMessageDialog(null,"The program will close now, open it again and you are ready!","Program will close",JOptionPane.WARNING_MESSAGE);     
        // System.exit(0);
     }

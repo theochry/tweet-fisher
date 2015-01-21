@@ -28,6 +28,7 @@ public class Settings extends javax.swing.JFrame  {
         _keywordsController = controller;
     }
     public Settings() {
+        super("Settings");
         initComponents();
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         createControls();
@@ -59,13 +60,13 @@ public class Settings extends javax.swing.JFrame  {
         occurencesSpn.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(10), Integer.valueOf(1), null, Integer.valueOf(1)));
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel2.setText("Time window [seconds]");
+        jLabel2.setText("Time window [minutes]");
 
-        timeWindowSpn.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(10), Integer.valueOf(10), null, Integer.valueOf(1)));
+        timeWindowSpn.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
 
         jLabel3.setText("eg 10 times the keyword \" earth \"");
 
-        jLabel4.setText("default is 60 seconds");
+        jLabel4.setText("default is 1 minute");
 
         saveBtn.setText("Save");
 

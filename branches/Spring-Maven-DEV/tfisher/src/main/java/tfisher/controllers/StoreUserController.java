@@ -19,6 +19,7 @@ import tfisher.session.UserModelHibernateImpl;
 @Component
 public class StoreUserController implements Observer
 {
+           
     private UserModelHibernateImpl _userManager = new UserModelHibernateImpl();    
     public void update(Observable o, Object arg) 
     {
@@ -31,9 +32,11 @@ public class StoreUserController implements Observer
         user.setNTimeZone(((User) o).getNTimeZone());
         user.setName(((User) o).getName());
         user.setScreenName(((User) o).getScreenName());
-        user.setStatusesCount(((User) o).getStatusesCount());  
-        System.out.println("STOREUSERCONTROLLER ID IS: "+user.getIdStr());
-        _userManager.saveNewUser(user);
+        user.setStatusesCount(((User) o).getStatusesCount());          
+        _userManager.saveNewUser(user);    
+        
+        
+    
         
     }
     
