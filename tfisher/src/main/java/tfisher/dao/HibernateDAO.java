@@ -25,7 +25,7 @@ public abstract class HibernateDAO<T, ID extends Serializable> implements Generi
  
     public void save(T entity) {
         Session hibernateSession = this.getSession();
-        hibernateSession.saveOrUpdate(entity);
+        hibernateSession.saveOrUpdate(entity);        
     }
  
     public void merge(T entity) {
@@ -63,6 +63,12 @@ public abstract class HibernateDAO<T, ID extends Serializable> implements Generi
         Query query = hibernateSession.createQuery("from " + clazz.getName());
         T = query.list();
         return T;
+    }
+    
+    public void update ( String field, T entity )
+    {
+        Session hibernateSession = this.getSession();
+        hibernateSession.update(field, entity);
     }
     
 }

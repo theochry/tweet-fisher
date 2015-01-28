@@ -25,6 +25,9 @@
     <property name="NLang" type="string">
       <column length="15" name="n_lang"/>
     </property>
+    <property name="stickyBit" type="boolean">
+      <column  name="sticky_bit"/>
+    </property>
     <set fetch="select" inverse="true" lazy="true" name="medias" table="media">
       <key>
         <column length="50" name="tweet_id_str"/>

@@ -30,4 +30,6 @@ public interface GenericDAO<T, ID extends Serializable> {
     public List findAll(Class clazz);
  
     public T findByID(Class clazz, BigDecimal id);
+    
+    public void update ( String field, T entity );
 }

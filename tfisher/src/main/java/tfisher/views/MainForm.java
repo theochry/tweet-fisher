@@ -12,15 +12,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
@@ -34,11 +27,13 @@ import tfisher.controllers.LoginController;
 import tfisher.controllers.ResultsController;
 import tfisher.controllers.StoreTweetController;
 import tfisher.controllers.StoreUserController;
-import tfisher.controllers.ConnectionChecker;
+import tfisher.controllers.StoreMediaController;
 import tfisher.dao.Keywords;
-import tfisher.entities.Notification;
+import tfisher.entities.Media;
+import tfisher.utils.Notification;
 import tfisher.entities.Tweet;
 import tfisher.entities.User;
+import tfisher.utils.History;
 import twitter4j.TwitterException;
 
 
@@ -62,6 +57,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public  static Keywords _keywordsModel;
     public static User user;
     public static Tweet tweet;
+    public static Media media;
     
     //controllers
     public static DownloadController _downloadController;  
@@ -69,13 +65,15 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public static KeywordsController _keywordsController;
     public static StoreUserController _storeUserController;
     public static StoreTweetController _storeTweetController;
+    public static StoreMediaController _storeMediaController;
     public static ResultsController _resultsController;
     public static Notification _notification;
+    public static History _keywordsHistory;
     
     //others
    
      public static TwitterAuth _twitterAuth;
-     public static ConnectionChecker _ck;
+     
      public boolean isRunning = false;
     
        MainForm(Keywords keywords)
@@ -155,7 +153,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     
     public void disableComponents()
     {
-         //startBtn.setEnabled(false);
+         startBtn.setEnabled(false);
          //settingsJmenu.setEnabled(false);
          //searchKeywordsJmenu.setEnabled(false);
     }
@@ -385,19 +383,23 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      _loginFormView = (Login)context.getBean("login"); 
      user = (User)context.getBean("user"); 
      tweet = (Tweet)context.getBean("tweet"); 
+     //media = (Media)context.getBean("media"); 
      _storeUserController = (StoreUserController)context.getBean("storeUserController"); 
      _storeTweetController = (StoreTweetController)context.getBean("storeTweetController"); 
+     _storeMediaController = (StoreMediaController)context.getBean("storeMediaController"); 
      _resultsController = (ResultsController)context.getBean("resultsController"); 
+     _keywordsHistory = (History)context.getBean("history"); 
      _notification = (Notification)context.getBean("notification"); 
     
-     
+     media = new Media();
      user.addObserver(_storeUserController);
      tweet.addObserver(_storeTweetController);
+     media.addObserver(_storeMediaController);
      _storeTweetController.addObserver(_notification);
      
      _keywordsController.setDependencies(_keywordsModel, _keywordsFormView);
      _loginController.setDependencies(_twitterAuth, _loginFormView);   
-     _downloadController.setDependencies(_keywordsModel, _tweetDTO, _twitterAuth, user, tweet);       
+     _downloadController.setDependencies(_keywordsModel, _tweetDTO, _twitterAuth, user, tweet, media);       
      _resultsController.setDependencies(tweet, _resultsFormView);
     
      
@@ -406,6 +408,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      _settingsFormView.addController( _keywordsController );  
      _resultsFormView.addController(_resultsController);
      _keywordsModel.addObserver( _mainForm );   
+     _keywordsModel.addObserver(_keywordsHistory);
      
      _tweetDTO.addObserver( _mainForm );        
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -477,7 +480,7 @@ class ResultsListener implements ActionListener {
    {       
         MainForm mf = MainForm.getSingletonInstance();
         mf.getResultsFormView().setVisible(true);   
-         _resultsFormView.populateComboKeywords(_keywordsModel);
+        _resultsFormView.populateComboKeywords(_keywordsModel);
     }   
 }
 
@@ -500,7 +503,8 @@ class DownloadListener implements ActionListener {
         {         
             try {             
                 _downloadController.startDownload(  keywords );            
-                _keywordsController.setIsRunning(true);
+               _keywordsFormView.isRunning(true);
+               disableComponents();
             } catch (TwitterException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -510,7 +514,9 @@ class DownloadListener implements ActionListener {
         else if ( andRB.isSelected() )
         {            
             try {            
-                _downloadController.startDownload(  keywords );              
+                _downloadController.startDownload(  keywords );    
+                 _keywordsFormView.isRunning(true);
+                 disableComponents();
             } catch (TwitterException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
