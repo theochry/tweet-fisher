@@ -33,11 +33,7 @@ public class StoreUserController implements Observer
         user.setName(((User) o).getName());
         user.setScreenName(((User) o).getScreenName());
         user.setStatusesCount(((User) o).getStatusesCount());          
-        _userManager.saveNewUser(user);    
-        
-        
-    
-        
+        _userManager.saveNewUser(user);       
     }
     
 }

@@ -101,7 +101,7 @@ public class Keywords extends Observable implements IKeywords{
     }
     public boolean checkKeywordPattern( String keyword )
     {
-        String pattern = "[a-zA-Z0-9#:)(?]*";
+        String pattern = "[a-zA-Z0-9 #:)(?]*";
         if ( keyword.matches(pattern) )
             return true;
         return false;

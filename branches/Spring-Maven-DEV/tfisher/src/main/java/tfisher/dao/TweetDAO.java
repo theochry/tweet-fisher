@@ -16,6 +16,8 @@ import tfisher.entities.Tweet;
  */
 public interface TweetDAO extends GenericDAO<Tweet, BigDecimal> 
 {
-    public List<Tweet> findByKeyword(String keyword);
+    public List<Tweet> findByKeyword(String keyword, boolean sticky);
+    
+    public void updateStickyBit(String keyword);
     
 }

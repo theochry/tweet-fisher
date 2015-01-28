@@ -13,6 +13,7 @@ import tfisher.dao.Keywords;
 import tfisher.session.TwitterDownloader;
 import twitter4j.TwitterException;
 import org.springframework.stereotype.Component;
+import tfisher.entities.Media;
 import tfisher.entities.Tweet;
 import tfisher.entities.User;
 
@@ -30,6 +31,7 @@ public class DownloadController
    private String _pin;
    private User _user;
    private Tweet _tweet;
+   private Media _media;
    
    public DownloadController(){};
    public DownloadController(Keywords keywords,  TweetDTO tweetDTO, TwitterAuth twitterAuth ) 
@@ -41,11 +43,12 @@ public class DownloadController
        _idownloader = new TwitterDownloader();
     }   
      
-    public void setDependencies(Keywords keywords, TweetDTO tweetDTO, TwitterAuth twitterAuth, User user, Tweet tweet )
+    public void setDependencies(Keywords keywords, TweetDTO tweetDTO, TwitterAuth twitterAuth, User user, Tweet tweet, Media media )
     {
         _keywords = keywords;   tweetDTO.clearTheTweetDTO();  _tweetDTO = tweetDTO;   
         _twitterAuth = twitterAuth;  _idownloader = new TwitterDownloader(); //TODO
-        _user = user; _tweet = tweet;
+        _user = user; _tweet = tweet; _media = media;
+        
     }
    public void setDownloader (ITwitterDownloader downloader)
    {
@@ -68,7 +71,7 @@ public class DownloadController
     public boolean startDownload(  String[] keywords ) throws TwitterException 
    {      
        _tweetDTO.clearTheTweetDTO();
-      Thread t = new Thread(new TwitterDownloader( _tweetDTO, _twitterAuth.getTwitterStream(), _keywords, _user, _tweet ) );
+      Thread t = new Thread(new TwitterDownloader( _tweetDTO, _twitterAuth.getTwitterStream(), _keywords, _user, _tweet, _media ) );
       t.start();   
       return true;
    }    

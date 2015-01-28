@@ -29,7 +29,8 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
   public String _latestKeyword;
   public String _keywordToDelete;
   public ArrayList<String> _keywordsArrayList = new ArrayList<String>();
-  
+  public boolean _isRunning = false;
+  private long _startTime, _timeWindow;
   
     public KeywordsController _keywordsController;
     public void addController( KeywordsController controller )
@@ -49,6 +50,10 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
         createControls();
         centerFrame();        
     } 
+  public void isRunning(boolean isRunning)
+  {
+      _isRunning = isRunning;
+  }
    private void centerFrame() 
    {
        Dimension windowSize = getSize();
@@ -236,6 +241,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
         @Override
         public void actionPerformed(ActionEvent e) 
         {
+            boolean checker = false;
             _latestKeyword = keywordsJtxt.getText();
                 
             if ( _keywordsController.keywordExist( _latestKeyword ) )
@@ -251,7 +257,26 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
                     keywordsList.add(keywordsJtxt.getText());
                     _keywordsArrayList.add(keywordsJtxt.getText());
                     keywordsJtxt.setText("");
-                    _keywordsController.setKeyword( _latestKeyword );                    
+                    if ( _isRunning == false )
+                    {
+                        _keywordsController.setKeyword( _latestKeyword );  
+                         _startTime = System.currentTimeMillis(); 
+                         _timeWindow = _startTime + 20000;  
+                    }
+                    else if ( _isRunning == true )
+                    {
+                        System.out.println("keywordsForm is Running true");
+                        while ( checker == false )
+                        {
+                               if ( System.currentTimeMillis() > _timeWindow )
+                               {
+                                    _keywordsController.setKeyword( _latestKeyword );                                    
+                                    _startTime = System.currentTimeMillis(); 
+                                    _timeWindow = _startTime + 20000; 
+                                    checker = true;
+                               }
+                        }
+                    }                  
                 }             
                 else
                 {

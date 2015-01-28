@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.springframework.stereotype.Component;
 import tfisher.interfaces.ITwitterDownloader;
 import tfisher.dao.Keywords;
+import tfisher.entities.Media;
 import tfisher.entities.Tweet;
 import twitter4j.*;
 import twitter4j.Status;
@@ -47,12 +48,13 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     private  Keywords _keywords;
     private User _user;
     private Tweet _tweet;
-   private static final String FILE_PATH = "C:/twitter4j.properties";
+    private Media _media;
+  
     public TwitterDownloader(){}
-    public TwitterDownloader( final TweetDTO tweetDTO, TwitterStream twitterStream, final Keywords keywords, User user, Tweet tweet )
+    public TwitterDownloader( final TweetDTO tweetDTO, TwitterStream twitterStream, final Keywords keywords, User user, Tweet tweet, Media media )
     {
         _tweetDTO = tweetDTO; _twitterStream = twitterStream;  _keywords = keywords; _user = user;
-        _tweet = tweet;
+        _tweet = tweet; _media = media;
     }
     
     /**
@@ -66,7 +68,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
      * @param tweet
      * @return TweetDTO with downloaded tweets
      */   
-    public boolean download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final Keywords keywords,final User user, final Tweet tweet ) 
+    public boolean download(  final TweetDTO tweetDTO, TwitterStream twitterStream, final Keywords keywords,final User user, final Tweet tweet, final Media media ) 
     {  
                 
         initHashMapOfKeywords (keywords);
@@ -84,8 +86,9 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                    if ( null == counterKeywords.get(keyword))
                    {
                        addNewKeyword(keyword);
+                       System.out.println("Arxiki time tou"+keyword+" kai counterkeywords einai: " +counterKeywords.get(keyword));
                    }        
-                   System.out.println("Arxiki time tou"+keyword+" kai counterkeywords einai: " +counterKeywords.get(keyword));
+                   
                }
                
                 ArrayList<String> reachedKeywords = new ArrayList<String>();                  
@@ -102,7 +105,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                         System.out.println("keyword check is: "+check);
                         if ( null != check )
                         {
-                            storeStatuses(check, user, tweet);                            
+                            storeStatuses(check, user, tweet, media);                                             
                         }
                     }                   
                      timeWindow = System.currentTimeMillis() + keywords.getTimeInterval();                    
@@ -133,8 +136,8 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
             public void onException(Exception ex) {
                 ex.printStackTrace();
                 if (ex.getMessage().startsWith("420")) 
-                {
-                       System.out.println("Πολλές προσπάθειες σύνδεσης, προσπαθήστε ξανά σε 5'");
+                {                 
+                     
                 }
             }       
             
@@ -151,14 +154,20 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     }// end of download 
     
     
-    public void storeStatuses(String keyword, User user, Tweet tweet)
+    public void storeStatuses(String keyword, User user, Tweet tweet, Media media)
     {       
         for(Status value : _keywordStatusMap.get(keyword)) 
-        {
+        {           
             storeUser(value,user);   
-            storeTweet(value,tweet,user);
+            storeTweet(value,tweet,user);  
+             if ( value.getMediaEntities().length >= 1 )
+             {                 
+                storeMediaEntities(value, media, tweet);
+             }
         }
         _keywordStatusMap.removeAll(keyword);
+        counterKeywords.remove(keyword);
+       
     }
 
     public void addNewKeyword( String keyword )
@@ -181,8 +190,8 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     }
     
     public void storeTweet(Status status, Tweet tweet, User user)
-    {
-        tweet.setCreatedAt(String.valueOf(status.getCreatedAt()));
+    {        
+        tweet.setCreatedAt(String.valueOf(status.getCreatedAt()));       
         tweet.setIdStr(String.valueOf(status.getId()));
         tweet.setNLang(status.getLang());
         tweet.setRetweetCount(status.getRetweetCount());
@@ -192,54 +201,32 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         tweet.changeState();
     }
     
+    public void storeMediaEntities( Status status, Media media, Tweet tweet )
+    {      
+         for (MediaEntity mediaEntity : status.getMediaEntities()) 
+         {          
+             media.setMediaUrl(mediaEntity.getMediaURL()); 
+             media.setIdStr(String.valueOf(mediaEntity.getId()));            
+             media.setType( mediaEntity.getType());  
+             media.setTweet(tweet);
+             media.changeState();
+         }       
+    }
+    
     public String checkOccurences(int occurences)
     {
         Iterator<String> counterKeywordsIterator = counterKeywords.keySet().iterator();
         while( counterKeywordsIterator.hasNext() )
         {
-          String key = counterKeywordsIterator.next();          
+          String key = counterKeywordsIterator.next();  
+          System.out.println("To keyword "+key+"exei emfaniseis # "+counterKeywords.get(key));
           if ( counterKeywords.get(key) >= occurences )
-          {        
+          {         
              return key;
           }         
         }
         return null;
-    }
-    
-   
-    
-    
-    public void deleteDuplicateStatuses( Multimap<String, Status> keywordStatusMap, HashMap<String, Integer> counterKeywords, int occurences )
-    {
-        Iterator<String> counterKeywordsIterator = counterKeywords.keySet().iterator();
-        while( counterKeywordsIterator.hasNext() )
-        {
-          String key = counterKeywordsIterator.next();          
-          if ( counterKeywords.get(key) < occurences )
-          {        
-             keywordStatusMap.removeAll(key);
-          }         
-        }
-    }
-    /**
-     * This method get the TweetDTO object and the number of desired occurences
-     * for each keyword. Then searches the TweetDTO MultiMap. If a key of the Multimap has less occurences, then the whole key deleted
-     * @param tweetDto
-     * @param occurences 
-     */
-    public void reachedKeywordsTweetDto( TweetDTO tweetDto, int occurences )
-    {       
-        Multimap<String, TweetDTO> tweetDtoIterator = tweetDto.getTweetDtoMultiHash();    
-        Iterator<String> counterKeywordsIterator = counterKeywords.keySet().iterator();         
-        while( counterKeywordsIterator.hasNext() )
-        {
-          String key = counterKeywordsIterator.next();          
-          if ( counterKeywords.get(key) < occurences )
-          {        
-             tweetDtoIterator.removeAll(key);
-          }         
-        }
-    }//end of reachedKeywordsTweetDto
+    }     
     
     /**
      * This method search for given keywords inside a twitter status
@@ -252,7 +239,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
      */  
     public String tweetContainsKeyword( Keywords keywords, String status  )
     { 
-         String pattern = "[a-zA-Z0-9#]*";
+         String pattern = "[a-zA-Z0-9 #:)(?]*";
          String keyword = "";
          int currentKeyword;  
          String statusCheck = status.toLowerCase(); 
@@ -268,13 +255,13 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
          }         
          for ( currentKeyword = 0 ; currentKeyword < keywords.getKeywords().size(); currentKeyword++ )
          {             
-             System.out.println("Keywords Num is: "+keywords.getKeywords().size());
+            
             if ( statusCheck.contains( keywords.getKeywords().get( currentKeyword ).toLowerCase() ) )
             {    
                 //Εάν υπάρχει το keyword στο status, τότε βάλ'το στη λίστα με τα keywords, και αύξησε το μετρητή του keyword
                 keyword = keywords.getKeywords().get( currentKeyword );
                 counterKeywords.put( keyword, counterKeywords.get(keyword) + 1);               
-                System.out.println("TWEET CONTAINS KEYWORD: " +counterKeywords.get(keyword));
+                
             }           
           }
          return keyword;        
@@ -293,8 +280,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         String[] keywordsArray = getArrayOfKeywords ( keywords );        
         for ( int kword = 0; kword < keywordsArray.length; kword++ )
         {
-            counterKeywords.put(keywordsArray[kword], 0); 
-             System.out.println("Keywords init is: " +counterKeywords.get(keywordsArray[kword]));
+            counterKeywords.put(keywordsArray[kword], 0);            
         }
     }
     
@@ -307,8 +293,10 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     
     @Override
     public void run() {
-        download(  _tweetDTO,_twitterStream, _keywords, _user, _tweet);
+        download(  _tweetDTO,_twitterStream, _keywords, _user, _tweet, _media);
     }
+
+    
 
     
   

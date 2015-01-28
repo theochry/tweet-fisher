@@ -22,12 +22,12 @@ import tfisher.entities.Tweet;
 public class TweetModelHibernateImpl implements TweetModelInterface
 {
     private TweetDAO tweetDAO = new TweetDAOHibernateImpl();
-    public List<Tweet> findByKeyword(String keyword) 
+    public List<Tweet> findByKeyword(String keyword, boolean sticky) 
     {
         List<Tweet> tweet = null;
         try {
             HibernateUtil.beginTransaction();
-            tweet = tweetDAO.findByKeyword(keyword);
+            tweet = tweetDAO.findByKeyword(keyword, sticky);
             HibernateUtil.commitTransaction();          
         } catch (HibernateException ex) {
             System.out.println("Cant load all tweets");
@@ -72,6 +72,16 @@ public class TweetModelHibernateImpl implements TweetModelInterface
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
+    public void updateStickyBit (String keyword )
+    {
+        try {
+            HibernateUtil.beginTransaction();
+            tweetDAO.updateStickyBit(keyword);
+            HibernateUtil.commitTransaction();
+        } catch (HibernateException ex) {
+            System.out.println("UpdateStickyBit ex");
+            HibernateUtil.rollbackTransaction();
+        }
+    }
     
 }

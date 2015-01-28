@@ -22,6 +22,7 @@ public class StoreTweetController extends Observable implements Observer
     private TweetModelHibernateImpl _tweetManager = new TweetModelHibernateImpl();    
     public void update(Observable o, Object arg) 
     {
+        System.out.println("===============================I CALLED");
        Tweet tweet = new Tweet();
        tweet.setCreatedAt(((Tweet) o).getCreatedAt());
        tweet.setIdStr(((Tweet) o).getIdStr());
@@ -30,7 +31,8 @@ public class StoreTweetController extends Observable implements Observer
        tweet.setRetweetCount(((Tweet) o).getRetweetCount());
        tweet.setSource(((Tweet) o).getSource());
        tweet.setText(((Tweet) o).getText());
-       tweet.setUser(((Tweet) o).getUser());       
+       tweet.setUser(((Tweet) o).getUser());
+       tweet.setStickyBit(false);
        _tweetManager.saveNewTweet(tweet);       
        changeState();       
     }

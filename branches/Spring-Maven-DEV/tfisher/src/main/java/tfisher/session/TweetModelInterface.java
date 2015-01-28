@@ -16,7 +16,7 @@ import tfisher.entities.Tweet;
  */
 public interface TweetModelInterface 
 {    
-    public List<Tweet> findByKeyword(String keyword); 
+    public List<Tweet> findByKeyword(String keyword, boolean sticky); 
     
     public List<Tweet> loadAllTweets();
     

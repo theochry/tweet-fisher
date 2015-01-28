@@ -34,9 +34,14 @@ public class ResultsController
           rf = resultsForm;
     }
      
-     public List<Tweet> findTweetsByKeyword( String keyword )
+     public List<Tweet> findTweetsByKeyword( String keyword, boolean sticky )
      {         
-          return _tweetManager.findByKeyword(keyword);
+          return _tweetManager.findByKeyword(keyword, sticky);
+     }
+     
+     public void updateStickyBit ( String keyword )
+     {
+         _tweetManager.updateStickyBit(keyword);
      }
 
      
