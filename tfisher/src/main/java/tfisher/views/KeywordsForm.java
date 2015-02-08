@@ -29,8 +29,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
   public String _latestKeyword;
   public String _keywordToDelete;
   public ArrayList<String> _keywordsArrayList = new ArrayList<String>();
-  public boolean _isRunning = false;
-  private long _startTime, _timeWindow;
+  private boolean isRunning = false;
   
     public KeywordsController _keywordsController;
     public void addController( KeywordsController controller )
@@ -50,9 +49,10 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
         createControls();
         centerFrame();        
     } 
-  public void isRunning(boolean isRunning)
+  
+  public void setIsRunning(boolean tf)
   {
-      _isRunning = isRunning;
+      isRunning = tf;
   }
    private void centerFrame() 
    {
@@ -193,7 +193,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
 
     @Override
     public void update(Observable obs, Object obj) {
-       System.out.println("KEYWORDS FORM update called!"+((Keywords) obs).getState());      
+       System.out.println("KEYWORDS FORM update called! "+((Keywords) obs).getState());      
     }   
        
     public ArrayList<String> getKeywords()
@@ -223,7 +223,12 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
            
             String item = keywordsList.getSelectedItem();
             if ( item != null )
-            {
+            {       
+                 if ( keywordsList.getItemCount() == 1 && isRunning == true)
+                {
+                    JOptionPane.showMessageDialog(null,"Must be at least one keyword","At least one keyword",JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                  _keywordToDelete = item;
                  keywordsList.remove(item);
                  _keywordsController.removeKeyword( _keywordToDelete );
@@ -252,38 +257,12 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
             } 
             else if ( !_keywordsController.keywordExist( _latestKeyword )  )
             {
-                if (  _keywordsController.checkKeywordPattern( _latestKeyword ) )
-                {
+                
                     keywordsList.add(keywordsJtxt.getText());
                     _keywordsArrayList.add(keywordsJtxt.getText());
-                    keywordsJtxt.setText("");
-                    if ( _isRunning == false )
-                    {
-                        _keywordsController.setKeyword( _latestKeyword );  
-                         _startTime = System.currentTimeMillis(); 
-                         _timeWindow = _startTime + 20000;  
-                    }
-                    else if ( _isRunning == true )
-                    {
-                        System.out.println("keywordsForm is Running true");
-                        while ( checker == false )
-                        {
-                               if ( System.currentTimeMillis() > _timeWindow )
-                               {
-                                    _keywordsController.setKeyword( _latestKeyword );                                    
-                                    _startTime = System.currentTimeMillis(); 
-                                    _timeWindow = _startTime + 20000; 
-                                    checker = true;
-                               }
-                        }
-                    }                  
-                }             
-                else
-                {
-                    keywordsJtxt.setText("");
-                    JOptionPane.showMessageDialog(null,"The keyword " +_latestKeyword +" contains no english characters","Try another keyword",JOptionPane.WARNING_MESSAGE);
-
-                }
+                    keywordsJtxt.setText("");                   
+                    _keywordsController.setKeyword( _latestKeyword );          
+                
             }       
         }
         

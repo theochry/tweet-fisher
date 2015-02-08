@@ -25,14 +25,14 @@ public class Keywords extends Observable implements IKeywords{
     private String _keywordToDelete = null;
     
     public Keywords() {}
-    public void setKeyword( String keyword )
-    {        
-        if ( checkKeywordPattern ( keyword ) )
-        {
+    public boolean setKeyword( String keyword )
+    {      
+            if( keyword.isEmpty() )
+                return false;
             _keywords.add( keyword );
             _state = "add";
-            changeState();
-        }        
+            changeState(); 
+            return true;
     }   
     public ArrayList<String> getKeywords()
     {
@@ -56,6 +56,7 @@ public class Keywords extends Observable implements IKeywords{
     }
     public String getLatestKeyword()
     {
+        
          return _keywords.get( _keywords.size() - 1 );       
     }
     public String getKeywordToDelete()

@@ -34,6 +34,7 @@ import tfisher.utils.Notification;
 import tfisher.entities.Tweet;
 import tfisher.entities.User;
 import tfisher.utils.History;
+import tfisher.utils.KeywordsReloader;
 import twitter4j.TwitterException;
 
 
@@ -73,15 +74,22 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     //others
    
      public static TwitterAuth _twitterAuth;
+     public boolean _isRunning = false;
+     private long _startTime, _timeWindow;
+     public static KeywordsReloader _keywordsReloader;
      
      public boolean isRunning = false;
     
        MainForm(Keywords keywords)
        {
-            super("Tweet-fisher");           
+                 
             this._keywordsModel = keywords;     
         }
     
+       public void setRunning(boolean isRunning)
+        {
+            _isRunning = isRunning;
+        }
      private void centerFrame() 
     {
         Dimension windowSize = getSize();
@@ -99,7 +107,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         initComponents();       
         createControls();
         centerFrame();
-    
+         setTitle(" Tweet-fisher ");  
         ButtonGroup buttonGroup = new ButtonGroup();        
         buttonGroup.add(orRB);
         buttonGroup.add(andRB);
@@ -170,8 +178,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         orRB = new javax.swing.JRadioButton();
         andRB = new javax.swing.JRadioButton();
         keywordsList = new java.awt.List();
-        checkAllKeywords = new javax.swing.JCheckBox();
-        jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         loginJmenu = new javax.swing.JMenuItem();
@@ -199,8 +205,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
 
         keywordsList.setMultipleMode(true);
 
-        checkAllKeywords.setText("Check all");
-
         javax.swing.GroupLayout keywordsPanelLayout = new javax.swing.GroupLayout(keywordsPanel);
         keywordsPanel.setLayout(keywordsPanelLayout);
         keywordsPanelLayout.setHorizontalGroup(
@@ -220,10 +224,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(keywordsPanelLayout.createSequentialGroup()
                         .addGap(39, 39, 39)
-                        .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(checkAllKeywords)))
-                .addContainerGap(101, Short.MAX_VALUE))
+                        .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(128, Short.MAX_VALUE))
         );
         keywordsPanelLayout.setVerticalGroup(
             keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -232,25 +234,13 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(keywordsPanelLayout.createSequentialGroup()
-                        .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
-                        .addComponent(orRB)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(andRB)
-                        .addGap(51, 51, 51))
-                    .addGroup(keywordsPanelLayout.createSequentialGroup()
-                        .addComponent(checkAllKeywords)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addComponent(orRB)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(andRB)
+                .addGap(51, 51, 51))
         );
-
-        jButton1.setText("jButton1");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
 
         jMenu1.setText("File");
 
@@ -308,10 +298,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(50, 50, 50)
                         .addComponent(startBtn))))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addGap(64, 64, 64))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -320,9 +306,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                 .addComponent(startBtn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(1, 1, 1)
-                .addComponent(jButton1)
-                .addContainerGap(81, Short.MAX_VALUE))
+                .addContainerGap(105, Short.MAX_VALUE))
         );
 
         pack();
@@ -335,11 +319,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private void searchJmenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchJmenuActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_searchJmenuActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-  String[] args = {"VwbqJqEWEGPLI9ZeaeRv8g","WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo"};
-       GetAccessToken.main(args);
-    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -388,6 +367,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      _storeTweetController = (StoreTweetController)context.getBean("storeTweetController"); 
      _storeMediaController = (StoreMediaController)context.getBean("storeMediaController"); 
      _resultsController = (ResultsController)context.getBean("resultsController"); 
+     _keywordsReloader = (KeywordsReloader)context.getBean("keywordsReloader");
      _keywordsHistory = (History)context.getBean("history"); 
      _notification = (Notification)context.getBean("notification"); 
     
@@ -397,10 +377,11 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      media.addObserver(_storeMediaController);
      _storeTweetController.addObserver(_notification);
      
+     
      _keywordsController.setDependencies(_keywordsModel, _keywordsFormView);
      _loginController.setDependencies(_twitterAuth, _loginFormView);   
-     _downloadController.setDependencies(_keywordsModel, _tweetDTO, _twitterAuth, user, tweet, media);       
-     _resultsController.setDependencies(tweet, _resultsFormView);
+     _downloadController.setDependencies(_keywordsModel, _twitterAuth, user, tweet, media, _keywordsReloader);       
+     _resultsController.setDependencies(_resultsFormView);
     
      
      _loginFormView.addController(_loginController );         
@@ -409,6 +390,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      _resultsFormView.addController(_resultsController);
      _keywordsModel.addObserver( _mainForm );   
      _keywordsModel.addObserver(_keywordsHistory);
+     _keywordsReloader.addObserver(_downloadController);
      
      _tweetDTO.addObserver( _mainForm );        
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -422,8 +404,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton andRB;
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JCheckBox checkAllKeywords;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
@@ -444,21 +424,54 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     // End of variables declaration//GEN-END:variables
 
 
+    
     //auto to update kaleitai gia kathe notify apo opoiondhpote typo antikeimenou
     public void update(Observable obs, Object x) {
          MainForm mf = MainForm.getSingletonInstance();
+         
         if( obs instanceof Keywords && "add".equals(((Keywords) obs).getState()) )
         {                
-             mf.keywordsList.add(((Keywords) obs).getLatestKeyword());               
+             mf.keywordsList.add(((Keywords) obs).getLatestKeyword());      
+             String[] keywordsArray = _keywordsModel.getArrayOfKeywords();
+             _notification.setKeywords(_keywordsModel);
+              if ( _isRunning == false ){ }
+             else if ( _isRunning == true )
+             {            
+                 try {
+                     _downloadController.startDownload(keywordsArray);
+                 } catch (TwitterException ex) {
+                     Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+                 } catch (InterruptedException ex) {
+                     Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+                 }
+             }
+             
         }
         else if ( obs instanceof Keywords && "remove".equals(((Keywords) obs).getState()))
         {           
-            mf.keywordsList.remove(((Keywords) obs).getKeywordToDelete());
+         
+            mf.keywordsList.remove(((Keywords) obs).getKeywordToDelete()); 
+               String[] keywordsArray  = ((Keywords) obs).getArrayOfKeywords();
+               _notification.setKeywords(_keywordsModel);
+             if ( _isRunning == false ){ }
+             else if ( _isRunning == true )
+             { 
+                 System.out.println("COUNT IS: "+keywordsList.getItemCount());
+                 if ( keywordsList.getItemCount() == 1 )
+                {
+                    JOptionPane.showMessageDialog(null,"Must be at least one keyword","At least one keyword",JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                 try {
+                     _downloadController.startDownload(keywordsArray);
+                 } catch (TwitterException ex) {
+                     Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+                 } catch (InterruptedException ex) {
+                     Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+                 }
+             }
         }
-        if ( obs instanceof TweetDTO)
-        {                  
-          
-        }
+     
         
     }
    
@@ -484,11 +497,8 @@ class ResultsListener implements ActionListener {
     }   
 }
 
-class DownloadListener implements ActionListener {
-   
-              
-                
-               
+class DownloadListener implements ActionListener 
+{       
     public void actionPerformed(ActionEvent e) 
     {   
         String[] keywords = keywordsList.getSelectedItems();
@@ -503,9 +513,14 @@ class DownloadListener implements ActionListener {
         {         
             try {             
                 _downloadController.startDownload(  keywords );            
-               _keywordsFormView.isRunning(true);
+                setRunning(true);               
                disableComponents();
+               _keywordsFormView.setIsRunning(true);
+               JOptionPane.showMessageDialog(null,"The downloading process has just started, you will be informed once collected results","Downloading Started",JOptionPane.INFORMATION_MESSAGE);
+
             } catch (TwitterException ex) {
+                Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
                   
@@ -515,9 +530,13 @@ class DownloadListener implements ActionListener {
         {            
             try {            
                 _downloadController.startDownload(  keywords );    
-                 _keywordsFormView.isRunning(true);
+                setRunning(true);
+                _keywordsFormView.setIsRunning(true);
                  disableComponents();
+                 JOptionPane.showMessageDialog(null,"The downloading process has just started, you will be informed once collected results","Downloading Started",JOptionPane.INFORMATION_MESSAGE);
             } catch (TwitterException ex) {
+                Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             }
               

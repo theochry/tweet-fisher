@@ -10,6 +10,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.springframework.stereotype.Component;
@@ -198,6 +199,8 @@ public class Settings extends javax.swing.JFrame  {
         {           
             _keywordsController.setOccurences( getOccurences() );
             _keywordsController.setTimeInterval( getTimeWindow() * 1000 );
+             JOptionPane.showMessageDialog(null,"your settings have been saved","settings saved",JOptionPane.INFORMATION_MESSAGE);
+            new Settings().setVisible(false);
         }        
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables

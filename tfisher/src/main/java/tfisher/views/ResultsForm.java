@@ -102,6 +102,7 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
         historyBtn = new javax.swing.JButton();
         oldTweetsBtn = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        waitingResultsLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -128,14 +129,14 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
             .addGroup(panel1Layout.createSequentialGroup()
                 .addGap(26, 26, 26)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1014, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         panel1Layout.setVerticalGroup(
             panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
 
         historyBtn.setText("Fetch All Keywords");
@@ -144,32 +145,38 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
 
         jLabel2.setText("All keywords (history) ");
 
+        waitingResultsLabel.setText("asd");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(panel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(46, 46, 46)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(keywordsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fetchResults))
-                    .addComponent(jLabel1))
-                .addGap(68, 68, 68)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addContainerGap()
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1046, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(historyCobmo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(oldTweetsBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(historyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jLabel2))
-                .addContainerGap(438, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jSeparator1)
+                        .addGap(46, 46, 46)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(keywordsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(fetchResults))
+                            .addComponent(jLabel1))
+                        .addGap(183, 183, 183)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(historyCobmo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(oldTweetsBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(historyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(jLabel2)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(34, 34, 34)
+                        .addComponent(waitingResultsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 371, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -186,7 +193,9 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
                     .addComponent(historyBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(oldTweetsBtn)
-                .addGap(89, 89, 89)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(waitingResultsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -242,6 +251,7 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
     private javax.swing.JButton oldTweetsBtn;
     private java.awt.Panel panel1;
     private javax.swing.JTable tweetsTable;
+    private javax.swing.JLabel waitingResultsLabel;
     // End of variables declaration//GEN-END:variables
 
     public void update(Observable o, Object arg) {
@@ -253,52 +263,53 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
         
         public void actionPerformed(ActionEvent e) 
         {
+            waitingResultsLabel.setText("Loading results, please wait...");       
+            
             String selectedItem = new String();
            
             _model.setRowCount(0);  
             if (e.getSource() == oldTweetsBtn)
-            {
-                System.out.println("OLD");
-                  selectedItem = String.valueOf(historyCobmo.getSelectedItem());
-                  List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,true);// ta tweets pou exw dei
-                  
-                   if ( tweets.isEmpty() )
-            {
-                 JOptionPane.showMessageDialog(null,"No results for this keyword","No results",JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            int i = 0;
-            for (Tweet tweet : tweets) 
-            {    
-                i++;
-                _model.insertRow(_model.getRowCount(), new Object[]{ tweet.getText(), tweet.getCreatedAt()});
-            }         
-            resizeColumnWidth(tweetsTable);
+            {               
+                
+                selectedItem = String.valueOf(historyCobmo.getSelectedItem());
+                List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,true);// ta tweets pou exw dei                  
+                if ( tweets.isEmpty() )
+                {
+                    JOptionPane.showMessageDialog(null,"No results for this keyword","No results",JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                int i = 0;            
+                for (Tweet tweet : tweets) 
+                {    
+                    i++;
+                    _model.insertRow(_model.getRowCount(), new Object[]{ tweet.getText(), tweet.getCreatedAt()});
+                }        
+                //waitingResultsLabel.setText("");
+                resizeColumnWidth(tweetsTable);
             }
             else if ( e.getSource() == fetchResults )
-            {
-                 System.out.println("NEW");
+            {               
                  selectedItem = String.valueOf(keywordsCombo.getSelectedItem());
                  List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,false);// ta tweets pou DEN exw dei
-                _resultsController.updateStickyBit(selectedItem);
+                 _resultsController.updateStickyBit(selectedItem);
                 
                 
                  if ( tweets.isEmpty() )
-            {
-                 JOptionPane.showMessageDialog(null,"No results for this keyword","No results",JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            int i = 0;
-            for (Tweet tweet : tweets) 
-            {    
-                i++;
-                _model.insertRow(_model.getRowCount(), new Object[]{ tweet.getText(), tweet.getCreatedAt()});               
-            }         
-            resizeColumnWidth(tweetsTable);
-            }
-           
-            
-           
+                {
+                    JOptionPane.showMessageDialog(null,"No results for this keyword","No results",JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                int i = 0;
+                //waitingResultsLabel.setText("Loading new results, please wait...");
+                for (Tweet tweet : tweets) 
+                {    
+                    i++;
+                    _model.insertRow(_model.getRowCount(), new Object[]{ tweet.getText(), tweet.getCreatedAt()});               
+                }  
+                System.out.println("results are: "+i);
+                resizeColumnWidth(tweetsTable);
+                waitingResultsLabel.setText("");
+            }          
         }   
     }
     
