@@ -30,20 +30,21 @@ public class KeywordsController
         _keywordsForm = keywordsForm;
         _keywords.addObserver((Observer) keywordsForm);
     }
-    public void setDependencies(Keywords keywords, KeywordsForm keywordsForm )
+    public boolean setDependencies(Keywords keywords, KeywordsForm keywordsForm )
     {
+        if ( keywords == null || keywordsForm == null )        
+            return false;
+        
         _keywords = keywords; _keywordsForm = keywordsForm;
         _keywords.addObserver((Observer) keywordsForm);
+        return true;
     }
     public boolean setKeyword( String keyword )
-    { 
-        
-       if ( _keywords.checkKeywordPattern( keyword ) )
-       {
-            _keywords.setKeyword(keyword);
-            return true;
-       }
-       return false;
+    {  
+        if ( keyword.isEmpty() )
+            return false;
+      _keywords.setKeyword(keyword);
+      return true;       
     }
     public void setIsRunning(boolean running)
     {
@@ -62,6 +63,8 @@ public class KeywordsController
      */
     public boolean removeKeyword ( String keyword )
     {
+        if ( keyword.isEmpty() )
+            return false;
        return _keywords.removeKeyword(keyword);
     } 
     /**
@@ -72,6 +75,8 @@ public class KeywordsController
      */
     public boolean keywordExist( String keyword )
     {
+         if ( keyword.isEmpty() )
+            return false;
         return _keywords.keywordExist(keyword);
     }
     public boolean checkKeywordPattern ( String keyword )

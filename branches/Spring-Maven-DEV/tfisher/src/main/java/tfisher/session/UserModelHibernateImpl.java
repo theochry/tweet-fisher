@@ -63,8 +63,8 @@ public class UserModelHibernateImpl implements UserModelInterface {
             HibernateUtil.commitTransaction();
         } catch (HibernateException ex) {
             System.out.println("saveNewPersonException");
-            ex.printStackTrace();
-            ex.getMessage();
+            //ex.printStackTrace();
+            //ex.getMessage();
             HibernateUtil.rollbackTransaction();
         }
     }

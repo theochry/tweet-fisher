@@ -60,6 +60,10 @@ public class TweetModelHibernateImpl implements TweetModelInterface
             HibernateUtil.commitTransaction();
         } catch (HibernateException ex) {
             System.out.println("saveNewTweetException");
+            ex.printStackTrace();
+            ex.getCause();
+            ex.getMessage();
+            HibernateUtil.closeSession();
             HibernateUtil.rollbackTransaction();
         }
     }

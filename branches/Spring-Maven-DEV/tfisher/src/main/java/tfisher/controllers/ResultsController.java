@@ -25,23 +25,30 @@ public class ResultsController
     private final TweetModelHibernateImpl _tweetManager = new TweetModelHibernateImpl();  
     public ResultsController(){}
     
-    public ResultsController(Tweet tweet, ResultsForm resultsForm) {
-        
+    public ResultsController( ResultsForm resultsForm ) 
+    { 
        rf = resultsForm;
     }
-     public void setDependencies(Tweet tweet, ResultsForm resultsForm )
+     public boolean setDependencies( ResultsForm resultsForm )
     {
-          rf = resultsForm;
+        if ( resultsForm == null )
+            return false;
+        rf = resultsForm;
+        return true;
     }
      
      public List<Tweet> findTweetsByKeyword( String keyword, boolean sticky )
-     {         
+     {      
+          if ( keyword.isEmpty() ){}
           return _tweetManager.findByKeyword(keyword, sticky);
      }
      
-     public void updateStickyBit ( String keyword )
+     public boolean updateStickyBit ( String keyword )
      {
+         if ( keyword.isEmpty() )
+             return false;
          _tweetManager.updateStickyBit(keyword);
+         return true;
      }
 
      
