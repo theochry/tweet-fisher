@@ -9,7 +9,6 @@ package tfisher.session;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.NonUniqueResultException;
 import org.hibernate.HibernateException;
 import tfisher.dao.HibernateUtil;
 import tfisher.dao.TweetDAO;
@@ -23,22 +22,22 @@ import tfisher.entities.Tweet;
 public class TweetModelHibernateImpl implements TweetModelInterface
 {
     private TweetDAO tweetDAO = new TweetDAOHibernateImpl();
-    public Tweet findByKeyword(String keyword) 
+    public List<Tweet> findByKeyword(String keyword, boolean sticky) 
     {
-        Tweet tweet = null;
+        List<Tweet> tweet = null;
         try {
             HibernateUtil.beginTransaction();
-            tweet = tweetDAO.findByKeyword(keyword);
-            HibernateUtil.commitTransaction();            
-        } catch (NonUniqueResultException ex) {
-            System.out.println("1");
-            System.out.println("Query returned more than one results.");
+            tweet = tweetDAO.findByKeyword(keyword, sticky);
+            HibernateUtil.commitTransaction();          
         } catch (HibernateException ex) {
+            System.out.println("Cant load all tweets");
            ex.printStackTrace();
         }
         return tweet;
         
     }
+    
+
 
     public List<Tweet> loadAllTweets() 
     {
@@ -61,6 +60,10 @@ public class TweetModelHibernateImpl implements TweetModelInterface
             HibernateUtil.commitTransaction();
         } catch (HibernateException ex) {
             System.out.println("saveNewTweetException");
+            ex.printStackTrace();
+            ex.getCause();
+            ex.getMessage();
+            HibernateUtil.closeSession();
             HibernateUtil.rollbackTransaction();
         }
     }
@@ -71,6 +74,18 @@ public class TweetModelHibernateImpl implements TweetModelInterface
 
     public void deleteTweet(Tweet tweet) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void updateStickyBit (String keyword )
+    {
+        try {
+            HibernateUtil.beginTransaction();
+            tweetDAO.updateStickyBit(keyword);
+            HibernateUtil.commitTransaction();
+        } catch (HibernateException ex) {
+            System.out.println("UpdateStickyBit ex");
+            HibernateUtil.rollbackTransaction();
+        }
     }
     
 }

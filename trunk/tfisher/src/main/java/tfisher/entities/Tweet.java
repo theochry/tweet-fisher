@@ -22,6 +22,8 @@ public class Tweet extends Observable implements java.io.Serializable {
      private Integer retweetCount;
      private String NLang;
      private Set medias = new HashSet(0);
+     private Boolean stickyBit;
+     
 
     public Tweet() {
     }
@@ -97,6 +99,14 @@ public class Tweet extends Observable implements java.io.Serializable {
     
     public void setMedias(Set medias) {
         this.medias = medias;       
+    }
+    public void setStickyBit ( Boolean sticky )
+    {
+        stickyBit = sticky;
+    }
+    public Boolean getStickyBit()
+    {
+        return stickyBit;
     }
 
 /**

@@ -6,8 +6,8 @@
 
 package tfisher.interfaces;
 
-import DTO.TweetDTO;
 import tfisher.dao.Keywords;
+import tfisher.entities.Media;
 import tfisher.entities.Tweet;
 import tfisher.entities.User;
 import twitter4j.TwitterStream;
@@ -18,6 +18,5 @@ import twitter4j.TwitterStream;
  */
 public interface ITwitterDownloader 
 {    
-    TweetDTO download (final TweetDTO tweetDTO, TwitterStream twitterStream, final int miliseconds, final Keywords keywords, User user, Tweet tweet );
-    
+    boolean download ( TwitterStream twitterStream, final Keywords keywords, User user, Tweet tweet , Media media );    
 }

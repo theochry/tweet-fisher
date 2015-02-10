@@ -29,7 +29,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
   public String _latestKeyword;
   public String _keywordToDelete;
   public ArrayList<String> _keywordsArrayList = new ArrayList<String>();
-  
+  private boolean isRunning = false;
   
     public KeywordsController _keywordsController;
     public void addController( KeywordsController controller )
@@ -42,12 +42,18 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
       return _keywordToDelete;
   }
   public KeywordsForm() 
-    {        
+    {   
+        super("Keywords");
         initComponents();
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         createControls();
         centerFrame();        
     } 
+  
+  public void setIsRunning(boolean tf)
+  {
+      isRunning = tf;
+  }
    private void centerFrame() 
    {
        Dimension windowSize = getSize();
@@ -187,7 +193,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
 
     @Override
     public void update(Observable obs, Object obj) {
-       System.out.println("KEYWORDS FORM update called!"+((Keywords) obs).getState());      
+       System.out.println("KEYWORDS FORM update called! "+((Keywords) obs).getState());      
     }   
        
     public ArrayList<String> getKeywords()
@@ -217,7 +223,12 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
            
             String item = keywordsList.getSelectedItem();
             if ( item != null )
-            {
+            {       
+                 if ( keywordsList.getItemCount() == 1 && isRunning == true)
+                {
+                    JOptionPane.showMessageDialog(null,"Must be at least one keyword","At least one keyword",JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                  _keywordToDelete = item;
                  keywordsList.remove(item);
                  _keywordsController.removeKeyword( _keywordToDelete );
@@ -235,6 +246,7 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
         @Override
         public void actionPerformed(ActionEvent e) 
         {
+            boolean checker = false;
             _latestKeyword = keywordsJtxt.getText();
                 
             if ( _keywordsController.keywordExist( _latestKeyword ) )
@@ -245,19 +257,12 @@ public class KeywordsForm extends javax.swing.JFrame implements Observer, Action
             } 
             else if ( !_keywordsController.keywordExist( _latestKeyword )  )
             {
-                if (  _keywordsController.checkKeywordPattern( _latestKeyword ) )
-                {
+                
                     keywordsList.add(keywordsJtxt.getText());
                     _keywordsArrayList.add(keywordsJtxt.getText());
-                    keywordsJtxt.setText("");
-                    _keywordsController.setKeyword( _latestKeyword );                    
-                }             
-                else
-                {
-                    keywordsJtxt.setText("");
-                    JOptionPane.showMessageDialog(null,"The keyword " +_latestKeyword +" contains no english characters","Try another keyword",JOptionPane.WARNING_MESSAGE);
-
-                }
+                    keywordsJtxt.setText("");                   
+                    _keywordsController.setKeyword( _latestKeyword );          
+                
             }       
         }
         

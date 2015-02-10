@@ -16,7 +16,7 @@ import tfisher.entities.Tweet;
  */
 public interface TweetModelInterface 
 {    
-    public Tweet findByKeyword(String keyword); 
+    public List<Tweet> findByKeyword(String keyword, boolean sticky); 
     
     public List<Tweet> loadAllTweets();
     
@@ -25,4 +25,6 @@ public interface TweetModelInterface
     public Tweet findTweetById(BigDecimal id);
  
     public void deleteTweet(Tweet tweet);
+    
+    
 }
