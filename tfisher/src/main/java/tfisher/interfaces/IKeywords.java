@@ -13,5 +13,5 @@ package tfisher.interfaces;
 public interface IKeywords 
 {
     boolean checkKeywordPattern(String keyword);
-    void setKeyword (String keyword );
+    boolean setKeyword (String keyword );
 }
