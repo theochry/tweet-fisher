@@ -8,7 +8,9 @@ package tfisher.controllers;
 
 import java.util.List;
 import org.springframework.stereotype.Component;
+import tfisher.entities.Media;
 import tfisher.entities.Tweet;
+import tfisher.session.MediaModelHibernateImpl;
 import tfisher.session.TweetModelHibernateImpl;
 import tfisher.views.ResultsForm;
 
@@ -20,9 +22,9 @@ import tfisher.views.ResultsForm;
 public class ResultsController 
 {
       
-    private Tweet _tweet;
     private ResultsForm rf;
     private final TweetModelHibernateImpl _tweetManager = new TweetModelHibernateImpl();  
+    private final MediaModelHibernateImpl _mediaManager = new MediaModelHibernateImpl();  
     public ResultsController(){}
     
     public ResultsController( ResultsForm resultsForm ) 
@@ -37,10 +39,10 @@ public class ResultsController
         return true;
     }
      
-     public List<Tweet> findTweetsByKeyword( String keyword, boolean sticky )
+     public List<Tweet> findTweetsByKeyword( String keyword, boolean sticky, int start, int end )
      {      
-          if ( keyword.isEmpty() ){}
-          return _tweetManager.findByKeyword(keyword, sticky);
+          //if ( keyword.isEmpty() ){}
+          return _tweetManager.findByKeyword(keyword, sticky, start, end);
      }
      
      public boolean updateStickyBit ( String keyword )
@@ -51,6 +53,9 @@ public class ResultsController
          return true;
      }
 
-     
+     public Media getUrl( String tweet_id )
+     {
+         return _mediaManager.getMediaUrl(tweet_id);
+     }
     
 }// end of ResultsController

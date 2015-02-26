@@ -157,7 +157,7 @@ public class Settings extends javax.swing.JFrame  {
 //      timeWindowSpn.addChangeListener( new TimeWindowListener());
 //      occurencesSpn.addChangeListener( new OccurencesListener());
       saveBtn.addActionListener( new SaveListener() );
-      setTitle(" Keywords settings ");
+      setTitle(" Download settings ");
       
     }
     public int getTimeWindow()

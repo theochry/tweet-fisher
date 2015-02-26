@@ -27,6 +27,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Component;
 import tfisher.controllers.ResultsController;
 import tfisher.dao.Keywords;
+import tfisher.entities.Media;
 import tfisher.entities.Tweet;
 import tfisher.utils.HistoryParser;
 
@@ -37,9 +38,8 @@ import tfisher.utils.HistoryParser;
 @Component
 public class ResultsForm extends javax.swing.JFrame implements Observer {
 
-    /**
-     * Creates new form ResultsForm
-     */
+  private static int start = 0, end = 50;
+  private static String newOld = new String();
       DefaultTableModel _model; 
     public ResultsForm() {
         super("Results");
@@ -59,9 +59,12 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
 
     public void createControls()
     {      
-      fetchResults.addActionListener(new FetchTweetsListener());
-      historyBtn.addActionListener(new FetchHistoryKeywords());
-      oldTweetsBtn.addActionListener(new FetchTweetsListener());
+      keywordsCombo.addActionListener(new ComboBoxListener());
+      historyCobmo.addActionListener(new ComboBoxListener());
+      historyBtn.addActionListener(new FetchHistoryKeywords());     
+      nexBtn.addActionListener(new NextBtnListener());
+      firstBtn.addActionListener(new NextBtnListener());
+      
     }
     public void populateComboKeywords( Keywords keywords )
     {
@@ -93,16 +96,15 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
 
         keywordsCombo = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
-        fetchResults = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         panel1 = new java.awt.Panel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tweetsTable = new javax.swing.JTable();
+        nexBtn = new javax.swing.JButton();
+        firstBtn = new javax.swing.JButton();
         historyCobmo = new javax.swing.JComboBox();
         historyBtn = new javax.swing.JButton();
-        oldTweetsBtn = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
-        waitingResultsLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -110,17 +112,27 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
 
         jLabel1.setText("New keywords");
 
-        fetchResults.setText("Fetch New Tweets");
-
         tweetsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Text", "Created at"
+                "Text", "Created at", "Picture"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(tweetsTable);
+
+        nexBtn.setText("Next >>");
+
+        firstBtn.setText("First");
 
         javax.swing.GroupLayout panel1Layout = new javax.swing.GroupLayout(panel1);
         panel1.setLayout(panel1Layout);
@@ -129,23 +141,29 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
             .addGroup(panel1Layout.createSequentialGroup()
                 .addGap(26, 26, 26)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1014, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(firstBtn)
+                .addGap(18, 18, 18)
+                .addComponent(nexBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(73, 73, 73))
         );
         panel1Layout.setVerticalGroup(
             panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nexBtn)
+                    .addComponent(firstBtn))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         historyBtn.setText("Fetch All Keywords");
 
-        oldTweetsBtn.setText("Fetch All Tweets");
-
         jLabel2.setText("All keywords (history) ");
-
-        waitingResultsLabel.setText("asd");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -153,49 +171,36 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(panel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1046, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(46, 46, 46)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(keywordsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(fetchResults))
-                            .addComponent(jLabel1))
-                        .addGap(183, 183, 183)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(historyCobmo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(oldTweetsBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(historyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addComponent(jLabel2)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(34, 34, 34)
-                        .addComponent(waitingResultsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 371, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap()
+                .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1046, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(46, 46, 46)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(keywordsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addGap(82, 82, 82)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(historyCobmo, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(historyBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(19, 19, 19)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(keywordsCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(fetchResults)
                     .addComponent(historyCobmo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(historyBtn))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(oldTweetsBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(waitingResultsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(57, 57, 57)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -240,7 +245,7 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton fetchResults;
+    private javax.swing.JButton firstBtn;
     private javax.swing.JButton historyBtn;
     private javax.swing.JComboBox historyCobmo;
     private javax.swing.JLabel jLabel1;
@@ -248,72 +253,126 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JComboBox keywordsCombo;
-    private javax.swing.JButton oldTweetsBtn;
+    private javax.swing.JButton nexBtn;
     private java.awt.Panel panel1;
     private javax.swing.JTable tweetsTable;
-    private javax.swing.JLabel waitingResultsLabel;
     // End of variables declaration//GEN-END:variables
 
     public void update(Observable o, Object arg) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    class FetchTweetsListener implements ActionListener
-    {     
-        
+    
+    class NextBtnListener implements ActionListener
+    {                
         public void actionPerformed(ActionEvent e) 
         {
-            waitingResultsLabel.setText("Loading results, please wait...");       
-            
-            String selectedItem = new String();
-           
-            _model.setRowCount(0);  
-            if (e.getSource() == oldTweetsBtn)
-            {               
-                
+            if ( newOld.isEmpty() )
+                {
+                    JOptionPane.showMessageDialog(null,
+                            "You have to choose from new or older keywords combobox","Choose keyword",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            if ( e.getSource() == firstBtn )
+            {                
+                start = 0;
+                end = 50;
+            }
+           if ( "old".equals(newOld) )//old tweets
+           {
+               String selectedItem = new String();           
+                _model.setRowCount(0);                       
                 selectedItem = String.valueOf(historyCobmo.getSelectedItem());
-                List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,true);// ta tweets pou exw dei                  
+                List <Tweet> tweets = _resultsController.
+                        findTweetsByKeyword(selectedItem,true, start, end );                 
                 if ( tweets.isEmpty() )
                 {
-                    JOptionPane.showMessageDialog(null,"No results for this keyword","No results",JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(null,
+                            "No results for this keyword","No results",
+                            JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
-                int i = 0;            
+                int i = 0;      
+                String picture = new String();
                 for (Tweet tweet : tweets) 
-                {    
-                    i++;
-                    _model.insertRow(_model.getRowCount(), new Object[]{ tweet.getText(), tweet.getCreatedAt()});
-                }        
-                //waitingResultsLabel.setText("");
+                {   
+                   Media media = _resultsController.getUrl(tweet.getIdStr());
+                   if ( media != null)
+                   {
+                       picture = media.getMediaUrl();
+                   }
+                   else
+                   {
+                       picture = "";
+                   }                      
+                    i++;                    
+                   
+                    _model.insertRow(_model.getRowCount(), new Object[]
+                    { tweet.getText(), tweet.getCreatedAt(), picture});
+                }         
                 resizeColumnWidth(tweetsTable);
+                System.out.println("START before increase: "+start+" End before increase: "+end);
+                start = end;
+                end = end+= 50;  
+                System.out.println("START after increase: "+start+" End after increase: "+end);
+                System.out.println("res "+i);
+           }
+           else if ( "new".equals(newOld) )//new tweets
+           {
+               String selectedItem = new String();
+            _model.setRowCount(0); 
+            selectedItem = String.valueOf(keywordsCombo.getSelectedItem());
+            List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,false, start, end );
+            _resultsController.updateStickyBit(selectedItem);         
+            if ( tweets.isEmpty() )
+            {
+                JOptionPane.showMessageDialog(null, "No results for this keyword","No results", JOptionPane.INFORMATION_MESSAGE);
+                    return;
             }
-            else if ( e.getSource() == fetchResults )
-            {               
-                 selectedItem = String.valueOf(keywordsCombo.getSelectedItem());
-                 List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,false);// ta tweets pou DEN exw dei
-                 _resultsController.updateStickyBit(selectedItem);
-                
-                
-                 if ( tweets.isEmpty() )
-                {
-                    JOptionPane.showMessageDialog(null,"No results for this keyword","No results",JOptionPane.INFORMATION_MESSAGE);
-                    return;
-                }
-                int i = 0;
-                //waitingResultsLabel.setText("Loading new results, please wait...");
+            int i = 0;               
+             String picture = new String();
                 for (Tweet tweet : tweets) 
-                {    
-                    i++;
-                    _model.insertRow(_model.getRowCount(), new Object[]{ tweet.getText(), tweet.getCreatedAt()});               
-                }  
-                System.out.println("results are: "+i);
+                {   
+                   Media media = _resultsController.getUrl(tweet.getIdStr());
+                   if ( media != null)
+                   {
+                       picture = media.getMediaUrl();
+                   }
+                   else
+                   {
+                       picture = "";
+                   }                      
+                    i++;                    
+                   
+                    _model.insertRow(_model.getRowCount(), new Object[]
+                    { tweet.getText(), tweet.getCreatedAt(), picture});
+                }
                 resizeColumnWidth(tweetsTable);
-                waitingResultsLabel.setText("");
-            }          
-        }   
+                start = end;
+                end = end+= 50;
+           }
+        }
+        
+    }    
+    
+   
+    class ComboBoxListener implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e) {                      
+            if ( e.getSource() == keywordsCombo )//new results
+            {
+                start = 0; end = 50;
+                newOld = "new";
+            }
+            else if ( e.getSource() == historyCobmo )//old results
+            {
+                start = 0; end = 50;
+                newOld = "old";
+            }
+        }
+        
     }
-    
-    
+      
     class FetchHistoryKeywords implements ActionListener
     {
         HistoryParser historyParser = new HistoryParser();
@@ -322,8 +381,7 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
             ArrayList < String > historyKeywords;
             historyCobmo.removeAllItems();  
             try {
-                    historyKeywords = historyParser.parseKeywords();
-                         
+                    historyKeywords = historyParser.parseKeywords();                         
                     for ( int i = 0; i < historyKeywords.size(); i++ )
                     { 
                          historyCobmo.addItem(historyKeywords.get(i));
@@ -336,6 +394,7 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
         }
         
     }
+       
     
     public void resizeColumnWidth(JTable table) {
     final TableColumnModel columnModel = table.getColumnModel();
@@ -349,4 +408,7 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
         columnModel.getColumn(column).setPreferredWidth(width);
     }
 }
+    
+    
+ 
 }

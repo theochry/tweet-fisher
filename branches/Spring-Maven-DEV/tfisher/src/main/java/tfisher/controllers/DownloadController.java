@@ -59,20 +59,12 @@ public class DownloadController implements Observer
    {
        _idownloader = new TwitterDownloader();
    }
-   /**
-    * 
-    * @param miliseconds
-    *       The given window time (int)
-    * @param keywords 
-    *       Keywords to monitor (String[])
-    * @return true/false
-    */
+ 
 
     /**
      *
      * @param keywords Keywords to monitor (String[])
-     * @return true/fals
-     * @throws twitter4j.TwitterExceptione
+     * @return true/false
      */
     public boolean startDownload(  String[] keywords ) throws TwitterException, InterruptedException 
    {      
@@ -87,23 +79,17 @@ public class DownloadController implements Observer
             return true;
        }
        else if ( isRunning == true )
-       {   
-          
-            if ( System.currentTimeMillis() - timeKeeper < 40000 ){return false;}
-            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IS RUNNING IS TRUE INSIDE DOWNLOADCONTROLLER, perissotera apo 40''");
+       {  
+            if ( System.currentTimeMillis() - timeKeeper < 40000 ){return false;}            
            _keywordsReloader.setTimer(60);
-            timeKeeper = System.currentTimeMillis();
-           
+            timeKeeper = System.currentTimeMillis();           
            return true;
        }
        return false;
-      
-      
    }    
 
     public void update(Observable o, Object arg) 
-    {
-        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^inside update");         
+    {       
          Thread t = new Thread(new TwitterDownloader( _twitterAuth.getTwitterStream(), _keywords, _user, _tweet, _media ) );
          t.start();  
          timeKeeper = System.currentTimeMillis();

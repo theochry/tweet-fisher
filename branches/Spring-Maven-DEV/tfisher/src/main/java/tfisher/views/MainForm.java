@@ -12,22 +12,18 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import tfisher.auth.TwitterAuth;
 import tfisher.controllers.DownloadController;
 import tfisher.controllers.KeywordsController;
-import tfisher.controllers.LoginController;
 import tfisher.controllers.ResultsController;
-import tfisher.controllers.StoreTweetController;
-import tfisher.controllers.StoreUserController;
-import tfisher.controllers.StoreMediaController;
 import tfisher.dao.Keywords;
 import tfisher.entities.Media;
 import tfisher.utils.Notification;
@@ -35,6 +31,7 @@ import tfisher.entities.Tweet;
 import tfisher.entities.User;
 import tfisher.utils.History;
 import tfisher.utils.KeywordsReloader;
+
 import twitter4j.TwitterException;
 
 
@@ -48,9 +45,10 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     //views   
     private static MainForm _mainForm;
     public static KeywordsForm _keywordsFormView;    
-    public static Settings _settingsFormView;    
-    public static Login _loginFormView;
+    public static Settings _settingsFormView;   
+   
     public static ResultsForm _resultsFormView;
+    public static LoginForm _loginForm;
     
     
     //models
@@ -61,16 +59,12 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     public static Media media;
     
     //controllers
-    public static DownloadController _downloadController;  
-    public static LoginController _loginController;
-    public static KeywordsController _keywordsController;
-    public static StoreUserController _storeUserController;
-    public static StoreTweetController _storeTweetController;
-    public static StoreMediaController _storeMediaController;
+    public static DownloadController _downloadController;    
+    public static KeywordsController _keywordsController;       
     public static ResultsController _resultsController;
     public static Notification _notification;
     public static History _keywordsHistory;
-    
+   
     //others
    
      public static TwitterAuth _twitterAuth;
@@ -99,19 +93,14 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         int dy = centerPoint.y - windowSize.height / 2;    
         setLocation(dx, dy);
         setResizable(false);
-    }
-    
-     
+    }     
     public MainForm() 
     {
         initComponents();       
         createControls();
         centerFrame();
-         setTitle(" Tweet-fisher ");  
-        ButtonGroup buttonGroup = new ButtonGroup();        
-        buttonGroup.add(orRB);
-        buttonGroup.add(andRB);
-        setResizable(false);
+         setTitle(" Tweet-fisher "); 
+         setResizable(false);
     }
     
    public void createControls()
@@ -121,6 +110,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         startBtn.addActionListener ( new DownloadListener() );     
         loginJmenu.addActionListener( new MenuLoginListener() );
         resultsJmenu.addActionListener(new ResultsListener());
+        exitJmenu.addActionListener(new ExitListener());
    }
    
     public Keywords getKeywords()
@@ -142,9 +132,9 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     {
         return _resultsFormView;
     } 
-    public Login getLoginFormView()
+    public LoginForm getLoginFormView()
     {
-        return _loginFormView;
+        return _loginForm;
     }
    
     public static MainForm getSingletonInstance()
@@ -155,10 +145,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         }
         return _mainForm;
     }
-    
- 
-   
-    
     public void disableComponents()
     {
          startBtn.setEnabled(false);
@@ -171,21 +157,18 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        jSeparator1 = new javax.swing.JSeparator();
         startBtn = new javax.swing.JButton();
         keywordsPanel = new java.awt.Panel();
-        jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
-        orRB = new javax.swing.JRadioButton();
-        andRB = new javax.swing.JRadioButton();
         keywordsList = new java.awt.List();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         loginJmenu = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
+        exitJmenu = new javax.swing.JMenuItem();
         searchJmenu = new javax.swing.JMenu();
         searchKeywordsJmenu = new javax.swing.JMenuItem();
-        jMenuItem5 = new javax.swing.JMenuItem();
         settingsJmenu = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         resultsJmenu = new javax.swing.JMenuItem();
@@ -196,13 +179,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
 
         jLabel1.setText("Added Keywords");
 
-        orRB.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        orRB.setSelected(true);
-        orRB.setText("Search with [ OR ] operator");
-
-        andRB.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        andRB.setText("Search with [ AND ] operator");
-
         keywordsList.setMultipleMode(true);
 
         javax.swing.GroupLayout keywordsPanelLayout = new javax.swing.GroupLayout(keywordsPanel);
@@ -211,40 +187,21 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
             keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(keywordsPanelLayout.createSequentialGroup()
                 .addGroup(keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(keywordsPanelLayout.createSequentialGroup()
-                        .addGap(64, 64, 64)
-                        .addComponent(jLabel1))
-                    .addGroup(keywordsPanelLayout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addGroup(keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(andRB)
-                            .addComponent(orRB)))
-                    .addGroup(keywordsPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(keywordsPanelLayout.createSequentialGroup()
-                        .addGap(39, 39, 39)
-                        .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(128, Short.MAX_VALUE))
+                    .addComponent(jLabel1)
+                    .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         keywordsPanelLayout.setVerticalGroup(
             keywordsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(keywordsPanelLayout.createSequentialGroup()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
-                .addComponent(orRB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(andRB)
-                .addGap(51, 51, 51))
+                .addComponent(keywordsList, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         jMenu1.setText("File");
 
-        loginJmenu.setText("Login");
+        loginJmenu.setText("Credentials");
         jMenu1.add(loginJmenu);
 
         jMenuItem2.setText("About");
@@ -255,8 +212,8 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         });
         jMenu1.add(jMenuItem2);
 
-        jMenuItem3.setText("Exit");
-        jMenu1.add(jMenuItem3);
+        exitJmenu.setText("Exit");
+        jMenu1.add(exitJmenu);
 
         jMenuBar1.add(jMenu1);
 
@@ -269,9 +226,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
 
         searchKeywordsJmenu.setText("Keywords");
         searchJmenu.add(searchKeywordsJmenu);
-
-        jMenuItem5.setText("Topics");
-        searchJmenu.add(jMenuItem5);
 
         settingsJmenu.setText("Settings");
         searchJmenu.add(settingsJmenu);
@@ -292,21 +246,14 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(0, 74, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(50, 50, 50)
-                        .addComponent(startBtn))))
+                .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
+                .addComponent(startBtn))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(53, 53, 53)
-                .addComponent(startBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(105, Short.MAX_VALUE))
+            .addComponent(startBtn)
+            .addComponent(keywordsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -355,36 +302,23 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
       _resultsFormView = (ResultsForm)context.getBean("resultsForm");
       
       _twitterAuth = (TwitterAuth)context.getBean("twitterAuth");
-      _settingsFormView = (Settings)context.getBean("settings");  
-     _loginController = (LoginController)context.getBean("loginController"); 
+      _settingsFormView = (Settings)context.getBean("settings");      
      _downloadController = (DownloadController)context.getBean("downloadController"); 
      _keywordsController = (KeywordsController)context.getBean("keywordsController"); 
-     _loginFormView = (Login)context.getBean("login"); 
+     _loginForm = (LoginForm)context.getBean("loginForm"); 
+     
      user = (User)context.getBean("user"); 
      tweet = (Tweet)context.getBean("tweet"); 
      //media = (Media)context.getBean("media"); 
-     _storeUserController = (StoreUserController)context.getBean("storeUserController"); 
-     _storeTweetController = (StoreTweetController)context.getBean("storeTweetController"); 
-     _storeMediaController = (StoreMediaController)context.getBean("storeMediaController"); 
+     media = new Media();     
      _resultsController = (ResultsController)context.getBean("resultsController"); 
      _keywordsReloader = (KeywordsReloader)context.getBean("keywordsReloader");
      _keywordsHistory = (History)context.getBean("history"); 
-     _notification = (Notification)context.getBean("notification"); 
-    
-     media = new Media();
-     user.addObserver(_storeUserController);
-     tweet.addObserver(_storeTweetController);
-     media.addObserver(_storeMediaController);
-     _storeTweetController.addObserver(_notification);
-     
-     
-     _keywordsController.setDependencies(_keywordsModel, _keywordsFormView);
-     _loginController.setDependencies(_twitterAuth, _loginFormView);   
+     _notification = (Notification)context.getBean("notification");   
+     _keywordsController.setDependencies(_keywordsModel, _keywordsFormView);       
      _downloadController.setDependencies(_keywordsModel, _twitterAuth, user, tweet, media, _keywordsReloader);       
      _resultsController.setDependencies(_resultsFormView);
-    
      
-     _loginFormView.addController(_loginController );         
      _keywordsFormView.addController( _keywordsController );  
      _settingsFormView.addController( _keywordsController );  
      _resultsFormView.addController(_resultsController);
@@ -402,20 +336,17 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JRadioButton andRB;
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JMenuItem exitJmenu;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JSeparator jSeparator1;
     private java.awt.List keywordsList;
     private java.awt.Panel keywordsPanel;
     private javax.swing.JMenuItem loginJmenu;
-    private javax.swing.JRadioButton orRB;
     private javax.swing.JMenuItem resultsJmenu;
     private javax.swing.JMenu searchJmenu;
     private javax.swing.JMenuItem searchKeywordsJmenu;
@@ -470,9 +401,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
                      Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
                  }
              }
-        }
-     
-        
+        }        
     }
    
    
@@ -503,14 +432,17 @@ class DownloadListener implements ActionListener
     {   
         String[] keywords = keywordsList.getSelectedItems();
         MainForm mf = MainForm.getSingletonInstance();  
+        File f = new File("twitter4j.properties");
+        if(!f.exists()) 
+        { 
+            JOptionPane.showMessageDialog(null,"You have to login first","No credentials",JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         if ( keywords.length < 1 )
         {
             JOptionPane.showMessageDialog(null,"You didn't choose any keywords","Choose a keyword",JOptionPane.WARNING_MESSAGE);
             return;
-        }
-           
-        if ( orRB.isSelected() )
-        {         
+        }               
             try {             
                 _downloadController.startDownload(  keywords );            
                 setRunning(true);               
@@ -522,26 +454,7 @@ class DownloadListener implements ActionListener
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
-            }
-                  
-           
-        }
-        else if ( andRB.isSelected() )
-        {            
-            try {            
-                _downloadController.startDownload(  keywords );    
-                setRunning(true);
-                _keywordsFormView.setIsRunning(true);
-                 disableComponents();
-                 JOptionPane.showMessageDialog(null,"The downloading process has just started, you will be informed once collected results","Downloading Started",JOptionPane.INFORMATION_MESSAGE);
-            } catch (TwitterException ex) {
-                Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
-            }
-              
-        }
-            
+            }      
      } 
     public String[] AndOperator ( String[] keywords )
     {
@@ -566,24 +479,23 @@ class MenuSettingsListener implements ActionListener {
 }
 
 
-class MenuLoginListener implements ActionListener {
+class MenuLoginListener implements ActionListener 
+{
     
   public void actionPerformed(ActionEvent e) 
    {       
-        //MainForm mf = MainForm.getSingletonInstance();
-        //mf.getLoginFormView().setVisible(true);   
-        
-         //(new Thread(new GetAccessToken())).start();
-         String[] arguments = new String[] {"VwbqJqEWEGPLI9ZeaeRv8g","WumU4D31KZSaESmq0ju82bXSnvC1e7Q64AV6GmBDCGo"};
-      //GetAccessToken.main(arguments);
-          
-        //JOptionPane.showMessageDialog(null,"The program will close now, open it again and you are ready!","Program will close",JOptionPane.WARNING_MESSAGE);     
-       // System.exit(0);
+        MainForm mf = MainForm.getSingletonInstance();
+        LoginForm lf = mf.getLoginFormView();
+        lf.setLoginForm(lf);
+        lf.setVisible(true);       
     }
+}
 
-        
-    }
-
-
-
+class ExitListener implements ActionListener
+{
+    public void actionPerformed(ActionEvent e) 
+    {
+        System.exit(0);
+    }    
+}
 }
