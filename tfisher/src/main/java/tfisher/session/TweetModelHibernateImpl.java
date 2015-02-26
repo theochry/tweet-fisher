@@ -22,12 +22,12 @@ import tfisher.entities.Tweet;
 public class TweetModelHibernateImpl implements TweetModelInterface
 {
     private TweetDAO tweetDAO = new TweetDAOHibernateImpl();
-    public List<Tweet> findByKeyword(String keyword, boolean sticky) 
+    public List<Tweet> findByKeyword(String keyword, boolean sticky, int start, int end) 
     {
         List<Tweet> tweet = null;
         try {
             HibernateUtil.beginTransaction();
-            tweet = tweetDAO.findByKeyword(keyword, sticky);
+            tweet = tweetDAO.findByKeyword(keyword, sticky, start, end);
             HibernateUtil.commitTransaction();          
         } catch (HibernateException ex) {
             System.out.println("Cant load all tweets");

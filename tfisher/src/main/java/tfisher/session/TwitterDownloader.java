@@ -8,6 +8,7 @@ package tfisher.session;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,9 @@ import tfisher.entities.Tweet;
 import twitter4j.*;
 import twitter4j.Status;
 import tfisher.entities.User;
+import tfisher.utils.CredentialsException;
+import tfisher.utils.Notification;
+import tfisher.utils.StoreManager;
 
 
 
@@ -32,7 +36,10 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     private long startTime;        
     private long endTime;
     private long timeWindow;   
-    private final FilterQuery filterQuery = new FilterQuery();   
+    private final FilterQuery filterQuery = new FilterQuery();  
+    private final Notification _notification = new Notification();
+    private ArrayList <String> notifyUserKeywors = new ArrayList<String>();
+   
     
     //_keywordStatusMap περιέχει ολόκληρο το status για το συγκεκριμένο keyword, ένα keyword μπορεί να υπάρχει πολλές φορές με διαφορετικό status
     private Multimap<String, Status> _keywordStatusMap = HashMultimap.create();
@@ -44,6 +51,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
     private User _user;
     private Tweet _tweet;
     private Media _media;
+    private String exceptionMessage = new String();
   
     public TwitterDownloader(){}
     public TwitterDownloader( TwitterStream twitterStream, final Keywords keywords, User user, Tweet tweet, Media media )
@@ -64,7 +72,8 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
      */   
     public boolean download(  TwitterStream twitterStream, final Keywords keywords,final User user, final Tweet tweet, final Media media ) 
     {  
-                
+        
+      
         initCounterOfKeywords (keywords);
         startTime = System.currentTimeMillis();     
         timeWindow = startTime + keywords.getTimeInterval();           
@@ -89,19 +98,36 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                  
                 //Κάθε φορά που λήγει το παράθυρο, έλεγξε ποια keywords έφτασαν τον αριθμό εμφανίσεων και αποθήκευσέ τα.
                 //Μετά ανανέωσε το παράθυρο.
-                if ( System.currentTimeMillis() > timeWindow )
-                {     
+                
+                String checkBefore = checkOccurences(keywords.getOccurences());
+                if ( System.currentTimeMillis() < timeWindow && checkBefore != null )
+                {                   
                     for ( int curKeyword = 0; curKeyword < keywords.getKeywords().size(); curKeyword++ )
                     {
-                        String check = checkOccurences(keywords.getOccurences());
-                        System.out.println("keyword check is: "+check);
+                        String check = checkOccurences(keywords.getOccurences());                       
+                        if ( null != check )
+                        {
+                            manageStoreStatuses(check, user, tweet, media); 
+                            notifyUserKeywors.add(check);
+                            counterKeywords.remove( check );
+                            _keywordStatusMap.removeAll(check);
+                        }   
+                    }    
+                }
+                if ( System.currentTimeMillis() > timeWindow )
+                {                  
+                    for ( int curKeyword = 0; curKeyword < keywords.getKeywords().size(); curKeyword++ )
+                    {
+                        String check = checkOccurences(keywords.getOccurences());                      
                         if ( null != check )
                         {
                             manageStoreStatuses(check, user, tweet, media); 
                             counterKeywords.remove( check );
                             _keywordStatusMap.removeAll(check);
                         }   
-                    }    
+                    }
+                    _notification.showToTask(notifyUserKeywors);                  
+                    notifyUserKeywors.clear();
                     timeWindow = System.currentTimeMillis() + keywords.getTimeInterval();                    
                 }                                  
              }
@@ -133,20 +159,33 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                 {                 
                      
                 }
+                if (ex.getMessage().startsWith("401")) 
+                {                 
+                     System.out.println("auth");
+                     exceptionMessage = "Wrong credentials";     
+                    try {
+                        throw new CredentialsException("Wrong credentials");
+                    } catch (CredentialsException ex1) {
+                        
+                    }
+                }
             }       
             
-        };// end of statusListener                  
-     
-        twitterStream.addListener(listener);            
+        };// end of statusListener     
+        twitterStream.addListener(listener);    
+        
         String[] lang = { "en" };
         filterQuery.language(lang); 
         String [] criteria = getArrayOfKeywords( keywords );
         filterQuery.track( criteria );   
-        twitterStream.filter(filterQuery);          
+        twitterStream.filter(filterQuery);  
+        if ( !exceptionMessage.isEmpty() )
+        {
+            return false;
+        }
         return true;
          
-    }// end of download 
-    
+    }    
    /**
     * This method manages the store proccess of statuses
     * @param keyword
@@ -163,31 +202,31 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         }
         
         for(Status value : _keywordStatusMap.get(keyword)) 
-        {           
-            storeUser(value,user);   
-            storeTweet(value,tweet,user);  
-             if ( value.getMediaEntities().length >= 1 )
+        {    
+            user = createUserObject(value,user);
+            tweet = createTweetObject(value,tweet,user); 
+            if ( value.getMediaEntities().length >= 1 )
              {                 
-                storeMediaEntities(value, media, tweet);
+                media = createMediaObject(value, media, tweet);              
              }
-        }       
+            else
+            {
+                //media = null;
+            }
+            Thread save = new Thread ( new StoreManager (user, tweet, media) );
+            save.run();
+        }   
+        _tweet.changeState();
         _keywordStatusMap.removeAll(keyword);
-        counterKeywords.remove(keyword);
-       
-                System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++ COUNTER");
-                for ( String value: counterKeywords.keySet() )
-                {
-                    System.out.println("counterKeywords are "+value);
-                }
-                System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++ keywordsMap");
-                for ( String value: _keywordStatusMap.keySet() )
-                {
-                    System.out.println("keywords map are "+value);
-                }
+        counterKeywords.remove(keyword);     
         return true;
     }
 
-    
+    public String getExceptionMessage()
+    {
+        return exceptionMessage;
+    }
+           
     public boolean addNewKeyword( String keyword )
     {
         if ( keyword.isEmpty() )
@@ -198,11 +237,11 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         return true;
        
     }
-    public boolean storeUser ( Status status, User user )
+    public User createUserObject ( Status status, User user )
     {
         if ( status.getText().isEmpty() || user == null )
         {
-            return false;
+            
         }
         user.setCreatedAt(status.getUser().getCreatedAt().toString());
         user.setFollowersCount(status.getUser().getFollowersCount());
@@ -213,16 +252,16 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         user.setNUtcOffset(1);              
         user.setName(status.getUser().getName());              
         user.setScreenName(status.getUser().getScreenName());
-        user.setStatusesCount(status.getUser().getStatusesCount()); user.setNTimeZone(status.getUser().getTimeZone());              
-        user.changeState();  
-        return true;
+        user.setStatusesCount(status.getUser().getStatusesCount()); 
+        user.setNTimeZone(status.getUser().getTimeZone());  
+        return user;
     }
     
-    public boolean storeTweet(Status status, Tweet tweet, User user)
+    public Tweet createTweetObject(Status status, Tweet tweet, User user)
     {    
         if ( status.getText().isEmpty() || user == null || tweet == null )
         {
-            return false;
+            
         }
         tweet.setCreatedAt(String.valueOf(status.getCreatedAt()));       
         tweet.setIdStr(String.valueOf(status.getId()));
@@ -231,25 +270,21 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         tweet.setSource(status.getSource());
         tweet.setText(status.getText());
         tweet.setUser(user);
-        tweet.changeState();
-        return true;
+        tweet.setStickyBit(false);       
+        return tweet;
     }
     
-    public boolean storeMediaEntities( Status status, Media media, Tweet tweet )
-    {      
-        if ( status.getText().isEmpty() || media == null || tweet == null )
-        {
-            return false;
-        }
+    public Media createMediaObject( Status status, Media media, Tweet tweet )
+    {     
+       
          for (MediaEntity mediaEntity : status.getMediaEntities()) 
-         {          
+         {           
              media.setMediaUrl(mediaEntity.getMediaURL()); 
              media.setIdStr(String.valueOf(mediaEntity.getId()));            
              media.setType( mediaEntity.getType());  
-             media.setTweet(tweet);
-             media.changeState();
+             media.setTweet(tweet);             
          }  
-         return true;
+         return media;
     }
     
     public String checkOccurences( int occurences )
@@ -257,8 +292,7 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
         Iterator<String> counterKeywordsIterator = counterKeywords.keySet().iterator();
         while( counterKeywordsIterator.hasNext() )
         {
-          String key = counterKeywordsIterator.next();  
-          System.out.println("To keyword "+key+" exei emfaniseis # "+counterKeywords.get(key));
+          String key = counterKeywordsIterator.next();           
           if ( counterKeywords.get(key) >= occurences )
           {         
              return key;

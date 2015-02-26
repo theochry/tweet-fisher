@@ -14,6 +14,6 @@
         </property>
     </bean>
  
-    <context:component-scan base-package="DTO,tfisher.entities,tfisher.interfaces,tfisher.dao,tfisher.views,tfisher.auth,tfisher.controllers" />
+    <context:component-scan base-package="DTO,tfisher.entities,tfisher.interfaces,tfisher.dao,tfisher.views,tfisher.auth,tfisher.controllers,tfisher.utils" />
     <import resource="db-config.xml" />   
 </beans>
