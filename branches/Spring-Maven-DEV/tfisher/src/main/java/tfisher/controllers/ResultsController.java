@@ -40,8 +40,7 @@ public class ResultsController
     }
      
      public List<Tweet> findTweetsByKeyword( String keyword, boolean sticky, int start, int end )
-     {      
-          //if ( keyword.isEmpty() ){}
+     {        
           return _tweetManager.findByKeyword(keyword, sticky, start, end);
      }
      

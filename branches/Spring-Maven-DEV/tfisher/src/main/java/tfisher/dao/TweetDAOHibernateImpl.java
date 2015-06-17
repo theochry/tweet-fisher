@@ -18,23 +18,7 @@ import tfisher.entities.Tweet;
 public class TweetDAOHibernateImpl extends HibernateDAO<Tweet, BigDecimal> implements TweetDAO
 {
  //https://community.oracle.com/thread/425742
-    private static int start = 0, end = 10;
-//    public List<Tweet> findByKeyword(String keyword, boolean sticky ) 
-//    {
-//        Tweet tweet = null;       
-//        String sql = "SELECT p FROM Tweet p WHERE p.stickyBit is (:sticky) "
-//                + "AND UPPER (p.text) LIKE UPPER (:keyword) ";         
-//        Query query = HibernateUtil.getSession().createQuery(sql)
-//        .setParameter("keyword", "%"+keyword+"%")
-//        .setParameter("sticky", sticky);     
-//        query.setFirstResult(0);
-//        query.setMaxResults(500);
-//        start = end;
-//        end = end + 500;
-//       
-//        return findMany(query);        
-//    }
-    
+    private static int start = 0, end = 10;   
       public List<Tweet> findByKeyword(String keyword, boolean sticky, int start, int end ) 
     {
         Tweet tweet = null;       

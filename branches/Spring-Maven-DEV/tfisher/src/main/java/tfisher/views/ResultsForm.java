@@ -119,15 +119,7 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
             new String [] {
                 "Text", "Created at", "Picture"
             }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false, true
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
+        ));
         jScrollPane1.setViewportView(tweetsTable);
 
         nexBtn.setText("Next >>");
@@ -319,39 +311,38 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
            }
            else if ( "new".equals(newOld) )//new tweets
            {
-               String selectedItem = new String();
-            _model.setRowCount(0); 
-            selectedItem = String.valueOf(keywordsCombo.getSelectedItem());
-            List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,false, start, end );
-            _resultsController.updateStickyBit(selectedItem);         
-            if ( tweets.isEmpty() )
-            {
-                JOptionPane.showMessageDialog(null, "No results for this keyword","No results", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-            }
-            int i = 0;               
-             String picture = new String();
+                String selectedItem = new String();
+                _model.setRowCount(0); 
+                selectedItem = String.valueOf(keywordsCombo.getSelectedItem());
+                List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,false, start, end );
+                _resultsController.updateStickyBit(selectedItem);         
+                if ( tweets.isEmpty() )
+                {
+                    JOptionPane.showMessageDialog(null, "No results for this keyword","No results", JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                }
+                int i = 0;               
+                String picture = new String();
                 for (Tweet tweet : tweets) 
                 {   
-                   Media media = _resultsController.getUrl(tweet.getIdStr());
-                   if ( media != null)
-                   {
-                       picture = media.getMediaUrl();
-                   }
-                   else
-                   {
-                       picture = "";
-                   }                      
-                    i++;                    
-                   
-                    _model.insertRow(_model.getRowCount(), new Object[]
-                    { tweet.getText(), tweet.getCreatedAt(), picture});
+                      Media media = _resultsController.getUrl(tweet.getIdStr());
+                      if ( media != null)
+                      {
+                          picture = media.getMediaUrl();
+                      }
+                      else
+                      {
+                          picture = "";
+                      }                      
+                       i++;
+                       _model.insertRow(_model.getRowCount(), new Object[]
+                       { tweet.getText(), tweet.getCreatedAt(), picture});
                 }
-                resizeColumnWidth(tweetsTable);
-                start = end;
-                end = end+= 50;
+                   resizeColumnWidth(tweetsTable);
+                   start = end;
+                   end = end+= 50;
            }
-        }
+        }//end of actionPerformed
         
     }    
     
