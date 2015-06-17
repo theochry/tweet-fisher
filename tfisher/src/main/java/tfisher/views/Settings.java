@@ -199,7 +199,7 @@ public class Settings extends javax.swing.JFrame  {
         {           
             _keywordsController.setOccurences( getOccurences() );
             _keywordsController.setTimeInterval( getTimeWindow() * 1000 );
-             JOptionPane.showMessageDialog(null,"your settings have been saved","settings saved",JOptionPane.INFORMATION_MESSAGE);
+             JOptionPane.showMessageDialog(null,"Your settings have been saved","Settings saved",JOptionPane.INFORMATION_MESSAGE);
             new Settings().setVisible(false);
         }        
     }
