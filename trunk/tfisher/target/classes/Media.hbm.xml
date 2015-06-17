@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 13 ??? 2014 8:05:24 ?? by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class name="tfisher.entities.Media" schema="public" table="media">
+    <id name="idStr" type="string">
+      <column length="50" name="id_str"/>
+      <generator class="assigned"/>
+    </id>
+    <many-to-one class="tfisher.entities.Tweet" fetch="select" name="tweet">
+      <column length="50" name="tweet_id_str"/>
+    </many-to-one>
+    <property name="mediaUrl" type="string">
+      <column length="50" name="media_url"/>
+    </property>
+    <property name="type" type="string">
+      <column length="50" name="type"/>
+    </property>
+  </class>
+</hibernate-mapping>

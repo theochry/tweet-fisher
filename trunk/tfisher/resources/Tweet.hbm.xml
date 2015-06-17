@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 13 ??? 2014 8:05:24 ?? by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class name="wtf.entities.Tweet" table="tweet" schema="public">
+        <id name="idStr" type="string">
+            <column name="id_str" length="50" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="user" class="wtf.entities.User" fetch="select">
+            <column name="user_id" length="50" />
+        </many-to-one>
+        <property name="createdAt" type="string">
+            <column name="created_at" length="50" />
+        </property>
+        <property name="text" type="string">
+            <column name="text" length="200" />
+        </property>
+        <property name="source" type="string">
+            <column name="source" length="100" />
+        </property>
+        <property name="retweetCount" type="java.lang.Integer">
+            <column name="retweet_count" />
+        </property>
+        <property name="NLang" type="string">
+            <column name="n_lang" length="15" />
+        </property>
+        <set name="medias" table="media" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="tweet_id_str" length="50" />
+            </key>
+            <one-to-many class="wtf.entities.Media" />
+        </set>
+    </class>
+</hibernate-mapping>
