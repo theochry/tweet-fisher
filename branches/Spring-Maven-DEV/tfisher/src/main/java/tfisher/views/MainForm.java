@@ -6,7 +6,7 @@
 
 package tfisher.views;
 
-import DTO.TweetDTO;
+
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
@@ -52,7 +52,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
     
     
     //models
-    public static TweetDTO _tweetDTO;  
+ 
     public  static Keywords _keywordsModel;
     public static User user;
     public static Tweet tweet;
@@ -297,7 +297,6 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
        _mainForm = new MainForm();
         //Initialize beans
       _keywordsModel = (Keywords)context.getBean("keywords");
-      _tweetDTO = (TweetDTO)context.getBean("tweetDTO");
       _keywordsFormView = (KeywordsForm)context.getBean("keywordsForm");     
       _resultsFormView = (ResultsForm)context.getBean("resultsForm");
       
@@ -326,7 +325,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
      _keywordsModel.addObserver(_keywordsHistory);
      _keywordsReloader.addObserver(_downloadController);
      
-     _tweetDTO.addObserver( _mainForm );        
+            
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {              
                  MainForm mf = MainForm.getSingletonInstance();
