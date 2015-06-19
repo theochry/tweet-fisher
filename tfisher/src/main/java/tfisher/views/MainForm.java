@@ -386,7 +386,7 @@ public class MainForm extends javax.swing.JFrame implements Observer  {
              if ( _isRunning == false ){ }
              else if ( _isRunning == true )
              { 
-                 System.out.println("COUNT IS: "+keywordsList.getItemCount());
+                
                  if ( keywordsList.getItemCount() == 1 )
                 {
                     JOptionPane.showMessageDialog(null,"Must be at least one keyword","At least one keyword",JOptionPane.INFORMATION_MESSAGE);
