@@ -44,11 +44,11 @@ public class ResultsController
           return _tweetManager.findByKeyword(keyword, sticky, start, end);
      }
      
-     public boolean updateStickyBit ( String keyword )
+     public boolean updateStickyBit ( String keyword,  List <Tweet> tweets )
      {
          if ( keyword.isEmpty() )
              return false;
-         _tweetManager.updateStickyBit(keyword);
+         _tweetManager.updateStickyBit(keyword, tweets);
          return true;
      }
 

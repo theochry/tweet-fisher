@@ -76,11 +76,11 @@ public class TweetModelHibernateImpl implements TweetModelInterface
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void updateStickyBit (String keyword )
+    public void updateStickyBit (String keyword, List <Tweet> tweets )
     {
         try {
             HibernateUtil.beginTransaction();
-            tweetDAO.updateStickyBit(keyword);
+            tweetDAO.updateStickyBit(keyword, tweets);
             HibernateUtil.commitTransaction();
         } catch (HibernateException ex) {
             System.out.println("UpdateStickyBit ex");

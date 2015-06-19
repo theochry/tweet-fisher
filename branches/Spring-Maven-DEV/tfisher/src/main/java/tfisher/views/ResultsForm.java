@@ -303,19 +303,20 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
                     { tweet.getText(), tweet.getCreatedAt(), picture});
                 }         
                 resizeColumnWidth(tweetsTable);
-                System.out.println("START before increase: "+start+" End before increase: "+end);
+               
                 start = end;
                 end = end+= 50;  
-                System.out.println("START after increase: "+start+" End after increase: "+end);
-                System.out.println("res "+i);
+                
            }
            else if ( "new".equals(newOld) )//new tweets
            {
+               
                 String selectedItem = new String();
                 _model.setRowCount(0); 
                 selectedItem = String.valueOf(keywordsCombo.getSelectedItem());
                 List <Tweet> tweets = _resultsController.findTweetsByKeyword(selectedItem,false, start, end );
-                _resultsController.updateStickyBit(selectedItem);         
+                
+                      
                 if ( tweets.isEmpty() )
                 {
                     JOptionPane.showMessageDialog(null, "No results for this keyword","No results", JOptionPane.INFORMATION_MESSAGE);
@@ -338,9 +339,10 @@ public class ResultsForm extends javax.swing.JFrame implements Observer {
                        _model.insertRow(_model.getRowCount(), new Object[]
                        { tweet.getText(), tweet.getCreatedAt(), picture});
                 }
+                System.out.println("RESULTS ARE: "+i);
                    resizeColumnWidth(tweetsTable);
-                   start = end;
-                   end = end+= 50;
+               
+                    _resultsController.updateStickyBit(selectedItem, tweets );  
            }
         }//end of actionPerformed
         

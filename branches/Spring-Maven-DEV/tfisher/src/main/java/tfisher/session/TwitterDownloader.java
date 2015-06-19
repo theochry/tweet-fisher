@@ -210,7 +210,6 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
                 media = createMediaObject(value, media, tweet);              
              }            
             Thread save = new Thread ( new StoreManager (user, tweet, media) );
-            System.out.println("99999999999999999999999999999999999999999999999999999999 MEDIA ID IS: "+media.getIdStr());
             save.run();
         }   
         _tweet.changeState();

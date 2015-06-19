@@ -20,7 +20,7 @@ public class TweetDAOHibernateImpl extends HibernateDAO<Tweet, BigDecimal> imple
  //https://community.oracle.com/thread/425742
     private static int start = 0, end = 10;   
       public List<Tweet> findByKeyword(String keyword, boolean sticky, int start, int end ) 
-    {
+    {       
         Tweet tweet = null;       
         String sql = "SELECT p FROM Tweet p WHERE "
                 + "p.stickyBit is (:sticky) AND UPPER (p.text) LIKE UPPER (:keyword) ";         
@@ -34,10 +34,14 @@ public class TweetDAOHibernateImpl extends HibernateDAO<Tweet, BigDecimal> imple
     
       
       
-    public void updateStickyBit(String keyword )
+      public void updateStickyBit(String keyword, List <Tweet> tweets )
     {
-        String sqlUpdate = "UPDATE Tweet Set stickyBit = true where UPPER (text) LIKE UPPER (:keyword)";
-        Query queryUpdate = HibernateUtil.getSession().createQuery(sqlUpdate).setParameter("keyword", "%"+keyword+"%");        
-        queryUpdate.executeUpdate();
+         for (Tweet tweet : tweets) 
+         {
+             String sqlUpdate = "UPDATE Tweet Set stickyBit = true where UPPER (text) LIKE UPPER (:keyword) AND id_str = :id_str";
+             Query queryUpdate = HibernateUtil.getSession().createQuery(sqlUpdate).setParameter("keyword", "%"+keyword+"%").setParameter("id_str", tweet.getIdStr());        
+             queryUpdate.executeUpdate();             
+         }
+        
     }
 }
