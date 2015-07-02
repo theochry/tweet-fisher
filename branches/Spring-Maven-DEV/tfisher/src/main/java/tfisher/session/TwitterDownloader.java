@@ -208,7 +208,11 @@ public class TwitterDownloader implements Runnable, ITwitterDownloader
             if ( value.getMediaEntities().length >= 1 )
              {                 
                 media = createMediaObject(value, media, tweet);              
-             }            
+             }          
+            else
+            {
+                media.setIdStr(null);
+            }
             Thread save = new Thread ( new StoreManager (user, tweet, media) );
             save.run();
         }   
